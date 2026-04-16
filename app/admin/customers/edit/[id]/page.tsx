@@ -5,15 +5,25 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCookies } from "@/helper/cookies";
 
-interface ServiceType {
+export interface CustomerEditPage {
   id: number;
+  user_id: number;
+  customer_number: string;
   name: string;
-  min_usage: number;
-  max_usage: number;
-  price: number;
+  phone: string;
+  address: string;
+  service_id: number;
+  owner_token: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export default function EditServicePage() {
+interface ServiceOption {
+  id: number;
+  name: string;
+}
+
+export default function EditCustomerPage() {
   const { id } = useParams();
   const router = useRouter();
 
@@ -21,26 +31,50 @@ export default function EditServicePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [services, setServices] = useState<ServiceOption[]>([]);
 
   const [formData, setFormData] = useState({
+    customer_number: "",
     name: "",
-    min_usage: "",
-    max_usage: "",
-    price: "",
+    phone: "",
+    address: "",
+    service_id: "",
   });
 
-  /** GET DETAIL SERVICE */
-  async function getServiceDetail() {
+  /** GET SERVICES FOR DROPDOWN */
+  async function getServices() {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/services/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/services`,
+        {
+          headers: {
+            "app-key": process.env.NEXT_PUBLIC_APP_KEY || "",
+            Authorization: `Bearer ${await getCookies("token")}`,
+          },
+        }
+      );
+
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setServices(json.data);
+      }
+    } catch (error) {
+      console.error("Gagal mengambil data services:", error);
+    }
+  }
+
+  /** GET DETAIL CUSTOMER */
+  async function getCustomerDetail() {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/customers/${id}`,
         {
           headers: {
             "app-key": process.env.NEXT_PUBLIC_APP_KEY || "",
             Authorization: `Bearer ${await getCookies("token")}`,
           },
           cache: "no-store",
-        },
+        }
       );
 
       const json = await res.json();
@@ -49,41 +83,36 @@ export default function EditServicePage() {
 
       // Set form data
       setFormData({
+        customer_number: json.data.customer_number || "",
         name: json.data.name || "",
-        min_usage: json.data.min_usage?.toString() || "",
-        max_usage: json.data.max_usage?.toString() || "",
-        price: json.data.price?.toString() || "",
+        phone: json.data.phone || "",
+        address: json.data.address || "",
+        service_id: json.data.service_id?.toString() || "",
       });
     } catch (error: any) {
-      setError("Gagal mengambil data service");
+      setError("Gagal mengambil data customer");
       console.error("Error:", error);
     } finally {
       setLoading(false);
     }
   }
 
-  /** UPDATE SERVICE */
+  /** UPDATE CUSTOMER */
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError("");
 
     // Validation
-    if (parseInt(formData.min_usage) > parseInt(formData.max_usage)) {
-      setError("Min usage tidak boleh lebih besar dari Max usage");
-      setSaving(false);
-      return;
-    }
-
-    if (parseInt(formData.price) < 0) {
-      setError("Harga tidak boleh negatif");
+    if (!formData.service_id) {
+      setError("Silakan pilih layanan");
       setSaving(false);
       return;
     }
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/services/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/customers/${id}`,
         {
           method: "PATCH",
           headers: {
@@ -93,11 +122,11 @@ export default function EditServicePage() {
           },
           body: JSON.stringify({
             name: formData.name,
-            min_usage: parseInt(formData.min_usage),
-            max_usage: parseInt(formData.max_usage),
-            price: parseInt(formData.price),
+            phone: formData.phone,
+            address: formData.address,
+            service_id: parseInt(formData.service_id),
           }),
-        },
+        }
       );
 
       const json = await res.json();
@@ -108,17 +137,19 @@ export default function EditServicePage() {
       
       // Redirect setelah 1.5 detik
       setTimeout(() => {
-        router.push("/admin/services");
+        router.push("/admin/customers");
       }, 1500);
 
     } catch (error: any) {
-      setError(error.message || "Gagal update service");
+      setError(error.message || "Gagal update customer");
     } finally {
       setSaving(false);
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -127,7 +158,8 @@ export default function EditServicePage() {
   };
 
   useEffect(() => {
-    getServiceDetail();
+    getServices();
+    getCustomerDetail();
   }, []);
 
   if (loading) {
@@ -135,7 +167,7 @@ export default function EditServicePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-3 text-gray-600">Memuat data service...</p>
+          <p className="mt-3 text-gray-600">Memuat data customer...</p>
         </div>
       </div>
     );
@@ -150,14 +182,14 @@ export default function EditServicePage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <Link
-                href="/admin/services"
+                href="/admin/customers"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-2 transition-colors"
               >
-                <span>←</span> Kembali ke Daftar Layanan
+                <span>←</span> Kembali ke Daftar Customer
               </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Edit Layanan</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Edit Customer</h1>
               <p className="text-gray-600 mt-1">
-                PDAM Tirta Pakuan • ID Service: #{id}
+                PDAM Tirta Pakuan • ID Customer: #{id}
               </p>
             </div>
           </div>
@@ -176,10 +208,10 @@ export default function EditServicePage() {
                 </div>
                 <div className="ml-3">
                   <p className="font-medium text-green-800">
-                    Service berhasil diperbarui!
+                    Customer berhasil diperbarui!
                   </p>
                   <p className="text-sm text-green-600 mt-1">
-                    Mengalihkan ke halaman daftar layanan...
+                    Mengalihkan ke halaman daftar customer...
                   </p>
                 </div>
               </div>
@@ -196,7 +228,7 @@ export default function EditServicePage() {
                   </div>
                 </div>
                 <div className="ml-3">
-                  <p className="font-medium text-red-800">Gagal memperbarui layanan</p>
+                  <p className="font-medium text-red-800">Gagal memperbarui customer</p>
                   <p className="text-sm text-red-600 mt-1">{error}</p>
                 </div>
               </div>
@@ -209,22 +241,48 @@ export default function EditServicePage() {
           {/* Form Header */}
           <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
             <h2 className="text-lg font-semibold text-gray-900">
-              Informasi Layanan
+              Informasi Customer
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Ubah data service sesuai kebutuhan
+              Ubah data customer sesuai kebutuhan
             </p>
           </div>
 
           {/* Form Content */}
           <form onSubmit={handleSubmit} className="px-6 py-8 space-y-6">
-            {/* Nama Layanan */}
+            {/* Nomor Customer (Read-only) */}
+            <div>
+              <label
+                htmlFor="customer_number"
+                className="block text-sm font-medium text-gray-900 mb-2"
+              >
+                Nomor Customer
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="customer_number"
+                  name="customer_number"
+                  value={formData.customer_number}
+                  disabled
+                  className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed"
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  🔢
+                </div>
+              </div>
+              <p className="mt-1 text-sm text-gray-500">
+                Nomor customer tidak dapat diubah
+              </p>
+            </div>
+
+            {/* Nama Customer */}
             <div>
               <label
                 htmlFor="name"
                 className="block text-sm font-medium text-gray-900 mb-2"
               >
-                Nama Layanan <span className="text-red-500">*</span>
+                Nama Customer <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -233,116 +291,107 @@ export default function EditServicePage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Nama layanan"
+                  placeholder="Nama lengkap customer"
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  📝
+                  👤
                 </div>
-              </div>
-              <p className="mt-1 text-sm text-gray-500">
-                Nama layanan yang akan ditampilkan ke pelanggan
-              </p>
-            </div>
-
-            {/* Min & Max Usage */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="min_usage"
-                  className="block text-sm font-medium text-gray-900 mb-2"
-                >
-                  Penggunaan Minimum (m³) <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    id="min_usage"
-                    name="min_usage"
-                    value={formData.min_usage}
-                    onChange={handleChange}
-                    placeholder="0"
-                    required
-                    min="0"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
-                  />
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    📊
-                  </div>
-                </div>
-                <p className="mt-1 text-sm text-gray-500">
-                  Batas minimum penggunaan air
-                </p>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="max_usage"
-                  className="block text-sm font-medium text-gray-900 mb-2"
-                >
-                  Penggunaan Maximum (m³) <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    id="max_usage"
-                    name="max_usage"
-                    value={formData.max_usage}
-                    onChange={handleChange}
-                    placeholder="0"
-                    required
-                    min="0"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
-                  />
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    📈
-                  </div>
-                </div>
-                <p className="mt-1 text-sm text-gray-500">
-                  Batas maksimum penggunaan air
-                </p>
               </div>
             </div>
 
-            {/* Harga */}
+            {/* Nomor Telepon */}
             <div>
               <label
-                htmlFor="price"
+                htmlFor="phone"
                 className="block text-sm font-medium text-gray-900 mb-2"
               >
-                Harga (Rp) <span className="text-red-500">*</span>
+                Nomor Telepon <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  Rp
-                </div>
                 <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  value={formData.price}
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleChange}
-                  placeholder="0"
+                  placeholder="081234567890"
                   required
-                  min="0"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  💰
+                  📱
+                </div>
+              </div>
+            </div>
+
+            {/* Alamat */}
+            <div>
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-900 mb-2"
+              >
+                Alamat <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <textarea
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Alamat lengkap customer"
+                  required
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400 resize-none"
+                />
+                <div className="absolute right-3 top-3 text-gray-400">
+                  📍
+                </div>
+              </div>
+            </div>
+
+            {/* Pilih Layanan */}
+            <div>
+              <label
+                htmlFor="service_id"
+                className="block text-sm font-medium text-gray-900 mb-2"
+              >
+                Pilih Layanan <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  id="service_id"
+                  name="service_id"
+                  value={formData.service_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors appearance-none bg-white"
+                >
+                  <option value="">-- Pilih Layanan --</option>
+                  {services.map((service) => (
+                    <option key={service.id} value={service.id}>
+                      {service.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+                  ▼
                 </div>
               </div>
               <p className="mt-1 text-sm text-gray-500">
-                Harga per unit layanan
+                Pilih jenis layanan yang digunakan customer
               </p>
             </div>
 
-            {/* Current Values */}
+            {/* Info Tambahan */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Catatan:</p>
-              <p className="text-sm text-gray-600">
-                Mengubah data layanan akan mempengaruhi semua transaksi yang menggunakan layanan ini.
-              </p>
+              <p className="text-sm font-medium text-gray-700 mb-2">Informasi:</p>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Nomor customer bersifat unik dan tidak dapat diubah</li>
+                <li>• Pastikan nomor telepon yang dimasukkan aktif</li>
+                <li>• Alamat harus lengkap untuk keperluan penagihan</li>
+              </ul>
             </div>
 
             {/* Form Actions */}
@@ -380,28 +429,9 @@ export default function EditServicePage() {
           </form>
         </div>
 
-        {/* Form Tips */}
-        <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <div className="h-6 w-6 rounded-full bg-yellow-100 flex items-center justify-center">
-                <span className="text-yellow-600 text-sm">⚠️</span>
-              </div>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-yellow-900">Peringatan:</p>
-              <ul className="mt-1 text-sm text-yellow-700 space-y-1">
-                <li>• Pastikan data yang diubah sudah benar</li>
-                <li>• Perubahan harga akan mempengaruhi transaksi mendatang</li>
-                <li>• Min usage tidak boleh lebih besar dari Max usage</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
         {/* Footer Note */}
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>PDAM Tirta Pakuan • Sistem Manajemen Layanan v1.0</p>
+          <p>PDAM Tirta Pakuan • Sistem Manajemen Customer v1.0</p>
           <p className="mt-1">Semua perubahan akan disimpan secara permanen</p>
         </div>
       </div>
