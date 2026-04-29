@@ -15,7 +15,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-export function AppSidebar() {
+export function CustomerSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
@@ -27,7 +27,7 @@ export function AppSidebar() {
 
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Link href="/admin/profile">
+                <Link href="/customer/profile">
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </Link>
@@ -36,30 +36,13 @@ export function AppSidebar() {
             
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Link href="/admin/services">
+                <Link href="/customer/bills">
                   <Book className="mr-2 h-4 w-4" />
-                  Service
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/customers">
-                  <Group className="mr-2 h-4 w-4" />
-                  Customer
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href="/admin/bills">
-                  <Group className="mr-2 h-4 w-4" />
                   Bills
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+
 
           </SidebarMenu>
         </SidebarGroup>

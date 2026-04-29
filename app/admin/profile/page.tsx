@@ -179,7 +179,15 @@ export default async function ProfilePage() {
                     icon="👥"
                     title="Kelola Pengguna"
                     description="Manajemen user sistem"
-                    gradient="from-green-500 to-green-600"
+                    gradient="from-blue-500 to-blue-600"
+                  />
+
+                   <MenuButton
+                    href="/admin/services"
+                    icon="📋"
+                    title="Kelola Layanan"
+                    description="Manajemen service PDAM"
+                    gradient="from-blue-500 to-blue-600"
                   />
                 </div>
               </div>
