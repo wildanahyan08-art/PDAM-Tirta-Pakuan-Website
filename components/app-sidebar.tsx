@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, User, Book, Group,  } from "lucide-react";
+import { Home, User, Book, Group, UsersRound } from "lucide-react";
 import { LogoutButton } from "@/components/logout";
 
 import {
@@ -46,7 +46,7 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/admin/customers">
-                  <Group className="mr-2 h-4 w-4" />
+                  <UsersRound className="mr-2 h-4 w-4" />
                   Customer
                 </Link>
               </SidebarMenuButton>
@@ -57,6 +57,15 @@ export function AppSidebar() {
                 <Link href="/admin/bills">
                   <Group className="mr-2 h-4 w-4" />
                   Bills
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/bills/verify">
+                  <Group className="mr-2 h-4 w-4" />
+                  Verify Payments
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

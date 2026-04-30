@@ -1,41 +1,251 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useState } from "react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { getCookies } from "@/helper/cookies";
 
-export default function Pay(){
-    /** this state for handling display of dialog */
-    const [isOpenDialog, setIsOpenDialog] = 
-        useState<boolean>(false)
-
-    function openDialog(){
-        setIsOpenDialog(true)
-    }
-    
-    return (
-        <div>
-            <Button 
-            type="button" onClick={() => openDialog()}
-            className="bg-blue-50 text-blue-500 border-blue-500">
-                Pay
-            </Button>
-
-            <Dialog open={isOpenDialog} onOpenChange={setIsOpenDialog}>
-                <DialogHeader>
-                    <DialogContent>
-                    <DialogTitle>
-                        Bill Payment
-                    </DialogTitle>
-                    <DialogDescription>
-                        You have to ensure that you upload payment proof correctly
-                    </DialogDescription>
-                        <form>
-                             
-                        </form>
-                    </DialogContent>
-                </DialogHeader>
-            </Dialog>
-        </div>
-    )
+interface PayProps {
+  billId: number;
+  amount: number;
+  onSuccess?: () => void;
 }
+
+interface PaymentResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    bill_id: number;
+    payment_date: string;
+    verified: boolean;
+    total_amount: number;
+    payment_proof: string;
+    owner_token: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export default function Pay({ billId, amount, onSuccess }: PayProps) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
+  const [error, setError] = useState("");
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Validasi ukuran file (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        setError("Ukuran file maksimal 2MB");
+        return;
+      }
+      
+      // Validasi tipe file
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
+      if (!allowedTypes.includes(file.type)) {
+        setError("Format file harus JPG, PNG, atau PDF");
+        return;
+      }
+      
+      setPaymentProof(file);
+      setError("");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!paymentProof) {
+      setError("Silakan pilih bukti pembayaran");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const token = await getCookies("token");
+      
+      // Buat FormData sesuai dengan yang diharapkan API
+      const formData = new FormData();
+      formData.append("bill_id", billId.toString());
+      formData.append("file", paymentProof);  // Key "file" sesuai dokumentasi
+
+      // Log untuk debugging
+      console.log("Sending payment for bill ID:", billId);
+      console.log("File name:", paymentProof.name);
+      console.log("File type:", paymentProof.type);
+      console.log("File size:", paymentProof.size, "bytes");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/payments`, {
+        method: "POST",
+        headers: {
+          "app-key": process.env.NEXT_PUBLIC_APP_KEY || "",
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const json: PaymentResponse = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.message || "Gagal mengirim pembayaran");
+      }
+
+      if (json.success) {
+        // Tutup modal
+        setOpen(false);
+        setPaymentProof(null);
+        
+        // Panggil callback jika ada
+        if (onSuccess) {
+          onSuccess();
+        }
+        
+        // Refresh halaman untuk menampilkan status terbaru
+        router.refresh();
+      } else {
+        throw new Error(json.message || "Gagal mengirim pembayaran");
+      }
+      
+    } catch (err: any) {
+      console.error("Payment error:", err);
+      setError(err.message || "Terjadi kesalahan saat mengirim pembayaran");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="default" size="sm" className="ml-2">
+          Bayar
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Konfirmasi Pembayaran</DialogTitle>
+          <DialogDescription>
+            Silakan transfer sesuai nominal dan upload bukti pembayaran
+          </DialogDescription>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Nominal Tagihan */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <p className="text-sm text-gray-600 mb-1">Total Tagihan</p>
+            <p className="text-2xl font-bold text-blue-600">
+              {formatCurrency(amount)}
+            </p>
+          </div>
+
+          {/* Informasi Bank */}
+          <div className="border rounded-lg p-4">
+            <p className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <span>🏦</span> Informasi Bank
+            </p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Bank BCA</span>
+                <span className="font-mono font-semibold text-gray-900">123 456 7890</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Bank Mandiri</span>
+                <span className="font-mono font-semibold text-gray-900">987 654 3210</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-2 pt-2 border-t">
+                a.n PDAM Tirta Pakuan
+              </p>
+            </div>
+          </div>
+
+          {/* Upload Bukti */}
+          <div>
+            <Label htmlFor="payment_proof" className="text-sm font-semibold">
+              Bukti Pembayaran <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="payment_proof"
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,application/pdf"
+              onChange={handleFileChange}
+              className="mt-1"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Format: JPG, PNG, PDF (Max 2MB)
+            </p>
+            {error && (
+              <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                <span>⚠️</span> {error}
+              </p>
+            )}
+          </div>
+
+          {/* Informasi Tambahan */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p className="text-xs text-yellow-800">
+              <span className="font-semibold">📌 Perhatian:</span> Pastikan bukti transfer 
+              menunjukkan nama pengirim, nomor rekening tujuan, jumlah transfer, dan tanggal transfer.
+            </p>
+          </div>
+
+          <DialogFooter className="gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+                setError("");
+                setPaymentProof(null);
+              }}
+            >
+              Batal
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={loading || !paymentProof}
+              className="min-w-[120px]"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  Mengirim...
+                </span>
+              ) : (
+                "Kirim Bukti"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+} 
