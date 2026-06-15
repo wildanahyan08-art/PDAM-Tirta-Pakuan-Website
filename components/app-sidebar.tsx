@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, User, Book, Group, UsersRound } from "lucide-react";
+import { User, BookOpen, Users, Receipt, ShieldCheck, LogOut } from "lucide-react";
 import { LogoutButton } from "@/components/logout";
 
 import {
@@ -19,60 +19,65 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
-        
+        <div className="px-4 py-5 border-b border-sidebar-border">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#0096c7] flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C12 2 4 8.5 4 14a8 8 0 0016 0C20 8.5 12 2 12 2z" fill="white" opacity="0.9"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-sidebar-foreground leading-tight">PDAM</p>
+              <p className="text-[10px] text-sidebar-foreground/50">Admin Panel</p>
+            </div>
+          </Link>
+        </div>
+
         <SidebarGroup>
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
-
           <SidebarMenu>
-
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/admin/profile">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/admin/services">
-                  <Book className="mr-2 h-4 w-4" />
-                  Service
+                  <BookOpen className="h-4 w-4" />
+                  <span>Service</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/admin/customers">
-                  <UsersRound className="mr-2 h-4 w-4" />
-                  Customer
+                  <Users className="h-4 w-4" />
+                  <span>Customer</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/admin/bills">
-                  <Group className="mr-2 h-4 w-4" />
-                  Bills
+                  <Receipt className="h-4 w-4" />
+                  <span>Bills</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/admin/bills/verify">
-                  <Group className="mr-2 h-4 w-4" />
-                  Verify Payments
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>Verify Payments</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-
           </SidebarMenu>
         </SidebarGroup>
-
       </SidebarContent>
 
       <SidebarFooter>

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCookies } from "@/helper/cookies";
 
-// Types
 interface Bill {
   id: number;
   customer_id: number;
@@ -84,7 +83,6 @@ export default function BillsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 10;
 
-  // Months for filter
   const months = [
     { value: "1", label: "Januari" },
     { value: "2", label: "Februari" },
@@ -100,7 +98,6 @@ export default function BillsPage() {
     { value: "12", label: "Desember" },
   ];
 
-  // Years (current year and 2 years back/forward)
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
@@ -114,12 +111,11 @@ export default function BillsPage() {
 
     try {
       const token = await getCookies("token");
-      
-      // Build query parameters
+
       const params = new URLSearchParams();
       params.append("page", currentPage.toString());
       params.append("limit", itemsPerPage.toString());
-      
+
       if (selectedMonth) params.append("month", selectedMonth);
       if (selectedYear) params.append("year", selectedYear);
       if (selectedStatus === "paid") params.append("paid", "true");
@@ -191,260 +187,184 @@ export default function BillsPage() {
 
   const getStatusBadge = (paid: boolean, paymentVerified?: boolean) => {
     if (paid && paymentVerified) {
-      return (
-        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-          Lunas & Terverifikasi
-        </span>
-      );
+      return <span className="badge bg-emerald-50 text-emerald-700">Lunas & Terverifikasi</span>;
     } else if (paid && !paymentVerified) {
-      return (
-        <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-          Menunggu Verifikasi
-        </span>
-      );
+      return <span className="badge bg-amber-50 text-amber-700">Menunggu Verifikasi</span>;
     } else {
-      return (
-        <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-          Belum Dibayar
-        </span>
-      );
+      return <span className="badge bg-red-50 text-red-700">Belum Dibayar</span>;
     }
   };
 
   if (loading && bills.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-3 text-gray-600">Memuat data tagihan...</p>
+          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-[#0077b6] border-r-transparent"></div>
+          <p className="mt-3 text-sm text-muted-foreground">Memuat data tagihan...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Manajemen Tagihan</h1>
-              <p className="text-gray-600 mt-1">
-                PDAM Tirta Pakuan • Daftar tagihan pelanggan
-              </p>
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[#0a1628]">Manajemen Tagihan</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">PDAM Tirta Pakuan — Daftar tagihan pelanggan</p>
+        </div>
+        <Link href="/admin/bills/add" className="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Buat Tagihan Baru
+        </Link>
+      </div>
+
+      <div className="bg-white rounded-xl border border-border p-4 mb-5">
+        <form onSubmit={handleSearch} className="flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <label className="label-field">Cari</label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Cari tagihan..."
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label className="label-field">Bulan</label>
+            <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="select-field">
+              <option value="">Semua Bulan</option>
+              {months.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="label-field">Tahun</label>
+            <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="select-field">
+              <option value="">Semua Tahun</option>
+              {years.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="label-field">Status</label>
+            <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="select-field">
+              <option value="">Semua Status</option>
+              <option value="paid">Lunas</option>
+              <option value="unpaid">Belum Dibayar</option>
+            </select>
+          </div>
+          <button type="submit" className="btn-primary">Cari</button>
+          <button type="button" onClick={resetFilters} className="btn-secondary">Reset</button>
+        </form>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+              <span className="text-red-600 text-xs">!</span>
             </div>
-            <Link
-              href="/admin/bills/add"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-            >
-              <span>+</span> Buat Tagihan Baru
-            </Link>
+            <p className="text-sm text-red-800">{error}</p>
           </div>
         </div>
+      )}
 
-    
+      <div className="bg-white rounded-xl border border-border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-[#f0f5ff]">
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase">ID</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Customer</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Periode</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Penggunaan</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Total</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Tanggal</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {bills.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    Tidak ada data tagihan
+                  </td>
+                </tr>
+              ) : (
+                bills.map((bill) => (
+                  <tr key={bill.id} className="hover:bg-[#f0f5ff] transition-colors">
+                    <td className="px-4 py-3.5 font-medium text-foreground">#{bill.id}</td>
+                    <td className="px-4 py-3.5">
+                      <div className="font-medium text-foreground">{bill.customer.name}</div>
+                      <div className="text-xs text-muted-foreground">{bill.customer.customer_number}</div>
+                    </td>
+                    <td className="px-4 py-3.5 text-muted-foreground">
+                      {getMonthName(bill.month)} {bill.year}
+                    </td>
+                    <td className="px-4 py-3.5 text-muted-foreground">{bill.usage_value} m³</td>
+                    <td className="px-4 py-3.5 font-semibold text-foreground">{formatCurrency(bill.amount)}</td>
+                    <td className="px-4 py-3.5">{getStatusBadge(bill.paid, bill.payments?.verified)}</td>
+                    <td className="px-4 py-3.5 text-xs text-muted-foreground">{formatDate(bill.createdAt)}</td>
+                    <td className="px-4 py-3.5 text-right">
+                      <div className="flex gap-2 justify-end">
+                        <Link href={`/admin/bills/${bill.id}`} className="text-xs font-medium text-[#0077b6] hover:text-[#00699e]">
+                          Detail
+                        </Link>
+                        {!bill.paid && (
+                          <>
+                            <span className="text-border">|</span>
+                            <Link href={`/admin/bills/edit/${bill.id}`} className="text-xs font-medium text-[#0096c7] hover:text-[#0084b3]">
+                              Edit
+                            </Link>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
-                  <span className="text-red-600">!</span>
-                </div>
-              </div>
-              <div className="ml-3">
-                <p className="font-medium text-red-800">Gagal memuat data</p>
-                <p className="text-sm text-red-600 mt-1">{error}</p>
-              </div>
+        {totalPages > 1 && (
+          <div className="px-4 py-3 border-t border-border bg-[#f0f5ff] flex items-center justify-between">
+            <div className="text-xs text-muted-foreground">
+              {(currentPage - 1) * itemsPerPage + 1} – {Math.min(currentPage * itemsPerPage, bills.length)} dari {bills.length}
+            </div>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 text-xs font-medium rounded-md border border-border hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Sebelumnya
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 text-xs font-medium rounded-md border border-border hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Selanjutnya
+              </button>
             </div>
           </div>
         )}
+      </div>
 
-        {/* Bills Table */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Periode
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Penggunaan
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total Tagihan
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tanggal Dibuat
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {bills.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                      Tidak ada data tagihan
-                    </td>
-                  </tr>
-                ) : (
-                  bills.map((bill) => (
-                    <tr key={bill.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        #{bill.id}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {bill.customer.name}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {bill.customer.customer_number}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {getMonthName(bill.month)} {bill.year}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {bill.usage_value} m³
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                        {formatCurrency(bill.amount)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(bill.paid, bill.payments?.verified)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(bill.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex gap-2">
-                          <Link
-                            href={`/admin/bills/${bill.id}`}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Detail
-                          </Link>
-                          {!bill.paid && (
-                            <>
-                              <span className="text-gray-300">|</span>
-                              <Link
-                                href={`/admin/bills/edit/${bill.id}`}
-                                className="text-green-600 hover:text-green-900"
-                              >
-                                Edit
-                              </Link>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-6">
+        {[
+          { label: "Total Tagihan", value: bills.length, color: "text-[#0077b6]" },
+          { label: "Lunas", value: bills.filter(b => b.paid && b.payments?.verified).length, color: "text-emerald-600" },
+          { label: "Menunggu Verifikasi", value: bills.filter(b => b.paid && !b.payments?.verified).length, color: "text-amber-600" },
+          { label: "Belum Dibayar", value: bills.filter(b => !b.paid).length, color: "text-red-600" },
+        ].map((item, i) => (
+          <div key={i} className="bg-white rounded-xl border border-border p-4">
+            <p className="text-xs text-muted-foreground">{item.label}</p>
+            <p className={`text-xl font-bold mt-1 ${item.color}`}>{item.value}</p>
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">
-                  Menampilkan {(currentPage - 1) * itemsPerPage + 1} -{" "}
-                  {Math.min(currentPage * itemsPerPage, bills.length)} dari{" "}
-                  {bills.length} data
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Sebelumnya
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Selanjutnya
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Tagihan</p>
-                <p className="text-2xl font-bold text-gray-900">{bills.length}</p>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-xl">📋</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Lunas</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {bills.filter(b => b.paid && b.payments?.verified).length}
-                </p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 text-xl">✓</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Menunggu Verifikasi</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {bills.filter(b => b.paid && !b.payments?.verified).length}
-                </p>
-              </div>
-              <div className="h-12 w-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                <span className="text-yellow-600 text-xl">⏳</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Belum Dibayar</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {bills.filter(b => !b.paid).length}
-                </p>
-              </div>
-              <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
-                <span className="text-red-600 text-xl">!</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

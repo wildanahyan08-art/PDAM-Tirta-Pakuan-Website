@@ -41,7 +41,6 @@ export default function EditCustomerPage() {
     service_id: "",
   });
 
-  /** GET SERVICES FOR DROPDOWN */
   async function getServices() {
     try {
       const res = await fetch(
@@ -63,7 +62,6 @@ export default function EditCustomerPage() {
     }
   }
 
-  /** GET DETAIL CUSTOMER */
   async function getCustomerDetail() {
     try {
       const res = await fetch(
@@ -81,7 +79,6 @@ export default function EditCustomerPage() {
 
       if (!res.ok) throw new Error(json.message);
 
-      // Set form data
       setFormData({
         customer_number: json.data.customer_number || "",
         name: json.data.name || "",
@@ -97,13 +94,11 @@ export default function EditCustomerPage() {
     }
   }
 
-  /** UPDATE CUSTOMER */
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError("");
 
-    // Validation
     if (!formData.service_id) {
       setError("Silakan pilih layanan");
       setSaving(false);
@@ -134,8 +129,7 @@ export default function EditCustomerPage() {
       if (!res.ok) throw new Error(json.message);
 
       setSuccess(true);
-      
-      // Redirect setelah 1.5 detik
+
       setTimeout(() => {
         router.push("/admin/customers");
       }, 1500);
@@ -164,276 +158,226 @@ export default function EditCustomerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-3 text-gray-600">Memuat data customer...</p>
+          <svg className="animate-spin h-6 w-6 mx-auto text-[#0077b6]" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <p className="mt-3 text-sm text-muted-foreground">Memuat data customer...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <Link
-                href="/admin/customers"
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-2 transition-colors"
-              >
-                <span>←</span> Kembali ke Daftar Customer
-              </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Edit Customer</h1>
-              <p className="text-gray-600 mt-1">
-                PDAM Tirta Pakuan • ID Customer: #{id}
-              </p>
-            </div>
+    <div>
+      <div className="mb-6">
+        <Link
+          href="/admin/customers"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 mb-3"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+          Kembali ke Daftar Customer
+        </Link>
+        <h1 className="text-2xl font-bold text-[#0a1628]">Edit Customer</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">PDAM Tirta Pakuan — ID Customer: #{id}</p>
+      </div>
+
+      {success && (
+        <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-3 flex items-start gap-3">
+          <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-emerald-800">Customer berhasil diperbarui!</p>
+            <p className="text-xs text-emerald-600 mt-0.5">Mengalihkan ke halaman daftar customer...</p>
           </div>
         </div>
+      )}
 
-        {/* Status Messages */}
-        <div className="mb-6 space-y-4">
-          {/* Success Message */}
-          {success && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                    <span className="text-green-600">✓</span>
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p className="font-medium text-green-800">
-                    Customer berhasil diperbarui!
-                  </p>
-                  <p className="text-sm text-green-600 mt-1">
-                    Mengalihkan ke halaman daftar customer...
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+      {error && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 flex items-start gap-3">
+          <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-3 h-3 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-red-800">Gagal memperbarui customer</p>
+            <p className="text-xs text-red-600 mt-0.5">{error}</p>
+          </div>
+        </div>
+      )}
 
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
-                    <span className="text-red-600">✗</span>
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p className="font-medium text-red-800">Gagal memperbarui customer</p>
-                  <p className="text-sm text-red-600 mt-1">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
+      <div className="bg-white rounded-xl border border-border">
+        <div className="px-5 py-4 border-b border-border">
+          <h2 className="text-sm font-semibold text-foreground">Informasi Customer</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Ubah data customer sesuai kebutuhan</p>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-          {/* Form Header */}
-          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Informasi Customer
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Ubah data customer sesuai kebutuhan
-            </p>
+        <form onSubmit={handleSubmit} className="px-5 py-5 space-y-5">
+          <div>
+            <label htmlFor="customer_number" className="label-field">
+              Nomor Customer
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                id="customer_number"
+                name="customer_number"
+                value={formData.customer_number}
+                disabled
+                className="input-field bg-[#f0f5ff] cursor-not-allowed text-muted-foreground pr-10"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
+              </div>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">Nomor customer tidak dapat diubah</p>
           </div>
 
-          {/* Form Content */}
-          <form onSubmit={handleSubmit} className="px-6 py-8 space-y-6">
-            {/* Nomor Customer (Read-only) */}
-            <div>
-              <label
-                htmlFor="customer_number"
-                className="block text-sm font-medium text-gray-900 mb-2"
+          <div>
+            <label htmlFor="name" className="label-field">
+              Nama Customer <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Nama lengkap customer"
+                required
+                className="input-field pl-10"
+              />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="phone" className="label-field">
+              Nomor Telepon <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="081234567890"
+                required
+                className="input-field pl-10"
+              />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" /></svg>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="address" className="label-field">
+              Alamat <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <textarea
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Alamat lengkap customer"
+                required
+                rows={3}
+                className="input-field resize-none pl-10"
+              />
+              <div className="absolute left-3 top-3 text-muted-foreground pointer-events-none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="service_id" className="label-field">
+              Pilih Layanan <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <select
+                id="service_id"
+                name="service_id"
+                value={formData.service_id}
+                onChange={handleChange}
+                required
+                className="select-field"
               >
-                Nomor Customer
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="customer_number"
-                  name="customer_number"
-                  value={formData.customer_number}
-                  disabled
-                  className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed"
-                />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  🔢
-                </div>
+                <option value="">-- Pilih Layanan --</option>
+                {services.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
               </div>
-              <p className="mt-1 text-sm text-gray-500">
-                Nomor customer tidak dapat diubah
-              </p>
             </div>
+            <p className="mt-1 text-xs text-muted-foreground">Pilih jenis layanan yang digunakan customer</p>
+          </div>
 
-            {/* Nama Customer */}
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-900 mb-2"
+          <div className="rounded-lg border border-border bg-[#f0f5ff] p-3">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-[#0077b6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3 h-3 text-[#0077b6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-foreground">Informasi:</p>
+                <ul className="mt-1 text-xs text-muted-foreground space-y-0.5 list-disc list-inside">
+                  <li>Nomor customer bersifat unik dan tidak dapat diubah</li>
+                  <li>Pastikan nomor telepon yang dimasukkan aktif</li>
+                  <li>Alamat harus lengkap untuk keperluan penagihan</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-border">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="submit"
+                disabled={saving}
+                className="btn-primary flex-1"
               >
-                Nama Customer <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Nama lengkap customer"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
-                />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  👤
-                </div>
-              </div>
-            </div>
-
-            {/* Nomor Telepon */}
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-900 mb-2"
+                {saving ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Menyimpan...
+                  </>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+                    Simpan Perubahan
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="btn-outline flex-1"
               >
-                Nomor Telepon <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="081234567890"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
-                />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  📱
-                </div>
-              </div>
+                Batalkan
+              </button>
             </div>
+          </div>
+        </form>
+      </div>
 
-            {/* Alamat */}
-            <div>
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-900 mb-2"
-              >
-                Alamat <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <textarea
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="Alamat lengkap customer"
-                  required
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400 resize-none"
-                />
-                <div className="absolute right-3 top-3 text-gray-400">
-                  📍
-                </div>
-              </div>
-            </div>
-
-            {/* Pilih Layanan */}
-            <div>
-              <label
-                htmlFor="service_id"
-                className="block text-sm font-medium text-gray-900 mb-2"
-              >
-                Pilih Layanan <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  id="service_id"
-                  name="service_id"
-                  value={formData.service_id}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors appearance-none bg-white"
-                >
-                  <option value="">-- Pilih Layanan --</option>
-                  {services.map((service) => (
-                    <option key={service.id} value={service.id}>
-                      {service.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
-                  ▼
-                </div>
-              </div>
-              <p className="mt-1 text-sm text-gray-500">
-                Pilih jenis layanan yang digunakan customer
-              </p>
-            </div>
-
-            {/* Info Tambahan */}
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Informasi:</p>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Nomor customer bersifat unik dan tidak dapat diubah</li>
-                <li>• Pastikan nomor telepon yang dimasukkan aktif</li>
-                <li>• Alamat harus lengkap untuk keperluan penagihan</li>
-              </ul>
-            </div>
-
-            {/* Form Actions */}
-            <div className="pt-6 border-t border-gray-200">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                >
-                  {saving ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Menyimpan...
-                    </>
-                  ) : (
-                    <>
-                      <span className="mr-2">✓</span>
-                      Simpan Perubahan
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.back()}
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
-                >
-                  Batalkan
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        {/* Footer Note */}
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>PDAM Tirta Pakuan • Sistem Manajemen Customer v1.0</p>
-          <p className="mt-1">Semua perubahan akan disimpan secara permanen</p>
-        </div>
+      <div className="mt-6 text-center text-xs text-muted-foreground">
+        <p>PDAM Tirta Pakuan • Sistem Manajemen Customer v1.0</p>
+        <p className="mt-0.5">Semua perubahan akan disimpan secara permanen</p>
       </div>
     </div>
   );

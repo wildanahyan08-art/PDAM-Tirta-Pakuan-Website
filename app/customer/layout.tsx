@@ -5,9 +5,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <CustomerSidebar />
-      <main>
-        <SidebarTrigger />
-        {children}
+      <main className="flex-1 bg-[#f0f5ff] min-h-screen">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-white">
+          <SidebarTrigger />
+          <span className="text-xs text-muted-foreground">PDAM Tirta Pakuan — Customer</span>
+        </div>
+        <div className="p-4 sm:p-6 lg:p-8">
+          {children}
+        </div>
       </main>
     </SidebarProvider>
   )

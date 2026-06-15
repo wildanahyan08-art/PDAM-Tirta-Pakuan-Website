@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCookies } from "@/helper/cookies";
 
-// Types
 interface ServiceType {
   id: number;
   name: string;
@@ -33,7 +32,7 @@ export default function AddCustomerPage() {
   const [success, setSuccess] = useState(false);
   const [services, setServices] = useState<ServiceType[]>([]);
   const [loadingServices, setLoadingServices] = useState(true);
-  
+
   const [formData, setFormData] = useState<CustomerFormData>({
     username: "",
     password: "",
@@ -45,7 +44,6 @@ export default function AddCustomerPage() {
     customer_number: "",
   });
 
-  // GET SERVICES
   useEffect(() => {
     getServices();
     generateCustomerNumber();
@@ -64,7 +62,7 @@ export default function AddCustomerPage() {
       });
 
       const json = await response.json();
-      
+
       if (response.ok) {
         setServices(json.data || []);
       }
@@ -83,7 +81,7 @@ export default function AddCustomerPage() {
     const dateStr = `${year}${month}${day}`;
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const customerNumber = `CUST-${dateStr}-${randomNum}`;
-    
+
     setFormData(prev => ({
       ...prev,
       customer_number: customerNumber
@@ -94,8 +92,7 @@ export default function AddCustomerPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    
-    // Khusus untuk NIK, hanya terima angka dan batasi 16 digit
+
     if (name === "nik") {
       const numericValue = value.replace(/\D/g, "").slice(0, 16);
       setFormData(prev => ({
@@ -152,7 +149,7 @@ export default function AddCustomerPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -162,7 +159,7 @@ export default function AddCustomerPage() {
 
     try {
       const token = await getCookies("token");
-      
+
       if (!token) {
         setError("Silakan login ulang");
         router.push("/sign-in");
@@ -197,7 +194,7 @@ export default function AddCustomerPage() {
       }
 
       setSuccess(true);
-      
+
       setFormData({
         username: "",
         password: "",
@@ -225,105 +222,74 @@ export default function AddCustomerPage() {
 
   if (loadingServices) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-3 text-gray-600">Memuat data layanan...</p>
+          <svg className="animate-spin h-6 w-6 mx-auto text-[#0077b6]" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <p className="mt-3 text-sm text-muted-foreground">Memuat data layanan...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+    <div>
+      <div className="mb-6">
+        <Link
+          href="/admin/customers"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 mb-3"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+          Kembali ke Daftar Customer
+        </Link>
+        <h1 className="text-2xl font-bold text-[#0a1628]">Tambah Customer Baru</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">PDAM Tirta Pakuan — Sistem Manajemen Customer</p>
+      </div>
+
+      {success && (
+        <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-3 flex items-start gap-3">
+          <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-emerald-800">Customer berhasil ditambahkan!</p>
+            <p className="text-xs text-emerald-600 mt-0.5">Mengalihkan ke halaman daftar customer...</p>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 flex items-start gap-3">
+          <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-3 h-3 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-red-800">Gagal menambahkan customer</p>
+            <p className="text-xs text-red-600 mt-0.5">{error}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-xl border border-border">
+        <div className="px-5 py-4 border-b border-border">
+          <h2 className="text-sm font-semibold text-foreground">Informasi Customer</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Isi data customer dengan lengkap dan benar</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-5 py-5 space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="w-1 h-4 rounded bg-[#0096c7]" />
+              <h3 className="text-sm font-semibold text-foreground">Identitas Customer</h3>
+            </div>
+
             <div>
-              <Link
-                href="/admin/customers"
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-2 transition-colors"
-              >
-                <span>←</span> Kembali ke Daftar Customer
-              </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Tambah Customer Baru</h1>
-              <p className="text-gray-600 mt-1">
-                PDAM Tirta Pakuan • Sistem Manajemen Customer
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Status Messages */}
-        <div className="mb-6 space-y-4">
-          {success && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                    <span className="text-green-600">✓</span>
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p className="font-medium text-green-800">
-                    Customer berhasil ditambahkan!
-                  </p>
-                  <p className="text-sm text-green-600 mt-1">
-                    Mengalihkan ke halaman daftar customer...
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
-                    <span className="text-red-600">✗</span>
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p className="font-medium text-red-800">Gagal menambahkan customer</p>
-                  <p className="text-sm text-red-600 mt-1">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Form Card */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-          {/* Form Header */}
-          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Informasi Customer
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Isi data customer dengan lengkap dan benar
-            </p>
-          </div>
-
-          {/* Form Content */}
-          <form onSubmit={handleSubmit} className="px-6 py-8 space-y-6">
-            {/* Identitas Customer */}
-            <div className="space-y-4">
-              <h3 className="text-md font-semibold text-gray-800 flex items-center gap-2">
-                <span className="w-1 h-5 bg-purple-500 rounded-full"></span>
-                Identitas Customer
-              </h3>
-              
-              {/* Customer Number */}
-              <div>
-                <label
-                  htmlFor="customer_number"
-                  className="block text-sm font-medium text-gray-900 mb-2"
-                >
-                  Nomor Customer <span className="text-red-500">*</span>
-                </label>
+              <label htmlFor="customer_number" className="label-field">
+                Nomor Customer <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
                 <input
                   type="text"
                   id="customer_number"
@@ -332,105 +298,91 @@ export default function AddCustomerPage() {
                   onChange={handleChange}
                   placeholder="CUST-20250311-1234"
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400 bg-gray-50"
+                  className="input-field pr-10 bg-[#f0f5ff] cursor-not-allowed"
                   readOnly
                 />
-                <div className="flex justify-between items-center mt-1">
-                  <p className="text-sm text-gray-500">
-                    Nomor unik untuk identifikasi customer
-                  </p>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
+                </div>
+              </div>
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-xs text-muted-foreground">Nomor unik untuk identifikasi customer</p>
+                <button
+                  type="button"
+                  onClick={generateCustomerNumber}
+                  className="text-xs text-[#0077b6] hover:text-[#0096c7] font-medium transition-colors"
+                >
+                  Generate Ulang
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="w-1 h-4 rounded bg-[#0077b6]" />
+              <h3 className="text-sm font-semibold text-foreground">Informasi Akun</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="username" className="label-field">
+                  Username <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="Masukkan username"
+                  required
+                  className="input-field"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">Username untuk login ke sistem</p>
+              </div>
+
+              <div>
+                <label htmlFor="password" className="label-field">
+                  Password <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Masukkan password"
+                    required
+                    className="input-field flex-1"
+                  />
                   <button
                     type="button"
-                    onClick={generateCustomerNumber}
-                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    onClick={generatePassword}
+                    className="btn-secondary whitespace-nowrap text-xs"
                   >
-                    Generate Ulang
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
+                    Generate
                   </button>
                 </div>
+                <p className="mt-1 text-xs text-muted-foreground">Minimal 6 karakter</p>
               </div>
             </div>
+          </div>
 
-            {/* Informasi Akun */}
-            <div className="space-y-4 pt-2">
-              <h3 className="text-md font-semibold text-gray-800 flex items-center gap-2">
-                <span className="w-1 h-5 bg-blue-500 rounded-full"></span>
-                Informasi Akun
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Username */}
-                <div>
-                  <label
-                    htmlFor="username"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Username <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    placeholder="Masukkan username"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
-                  />
-                  <p className="mt-1 text-sm text-gray-500">
-                    Username untuk login ke sistem
-                  </p>
-                </div>
-
-                {/* Password */}
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Password <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Masukkan password"
-                      required
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
-                    />
-                    <button
-                      type="button"
-                      onClick={generatePassword}
-                      className="px-4 py-3 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium whitespace-nowrap"
-                    >
-                      Generate
-                    </button>
-                  </div>
-                  <div className="flex justify-between items-center mt-1">
-                    <p className="text-sm text-gray-500">Minimal 6 karakter</p>
-                  </div>
-                </div>
-              </div>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="w-1 h-4 rounded bg-[#0096c7]" />
+              <h3 className="text-sm font-semibold text-foreground">Informasi Pribadi</h3>
             </div>
 
-            {/* Informasi Pribadi */}
-            <div className="space-y-4">
-              <h3 className="text-md font-semibold text-gray-800 flex items-center gap-2">
-                <span className="w-1 h-5 bg-green-500 rounded-full"></span>
-                Informasi Pribadi
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Nama Lengkap */}
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Nama Lengkap <span className="text-red-500">*</span>
-                  </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="name" className="label-field">
+                  Nama Lengkap <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
                   <input
                     type="text"
                     id="name"
@@ -439,49 +391,44 @@ export default function AddCustomerPage() {
                     onChange={handleChange}
                     placeholder="Contoh: Budi Santoso"
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
+                    className="input-field pl-10"
                   />
-                </div>
-
-                {/* NIK dengan indikator 0/16 */}
-                <div>
-                  <label
-                    htmlFor="nik"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    NIK <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      id="nik"
-                      name="nik"
-                      value={formData.nik}
-                      onChange={handleChange}
-                      placeholder="16 digit NIK"
-                      required
-                      maxLength={16}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400 pr-16"
-                    />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-400">
-                      {formData.nik.length}/16
-                    </div>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">
-                    16 digit angka sesuai KTP
-                  </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Nomor Telepon */}
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Nomor Telepon <span className="text-red-500">*</span>
-                  </label>
+              <div>
+                <label htmlFor="nik" className="label-field">
+                  NIK <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="nik"
+                    name="nik"
+                    value={formData.nik}
+                    onChange={handleChange}
+                    placeholder="16 digit NIK"
+                    required
+                    maxLength={16}
+                    className="input-field pr-12"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                    {formData.nik.length}/16
+                  </div>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">16 digit angka sesuai KTP</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="phone" className="label-field">
+                  Nomor Telepon <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
                   <input
                     type="tel"
                     id="phone"
@@ -490,28 +437,27 @@ export default function AddCustomerPage() {
                     onChange={handleChange}
                     placeholder="081234567890"
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
+                    className="input-field pl-10"
                   />
-                  <p className="mt-1 text-sm text-gray-500">
-                    Nomor aktif untuk notifikasi
-                  </p>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" /></svg>
+                  </div>
                 </div>
+                <p className="mt-1 text-xs text-muted-foreground">Nomor aktif untuk notifikasi</p>
+              </div>
 
-                {/* Pilih Layanan */}
-                <div>
-                  <label
-                    htmlFor="service_id"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Pilih Layanan <span className="text-red-500">*</span>
-                  </label>
+              <div>
+                <label htmlFor="service_id" className="label-field">
+                  Pilih Layanan <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
                   <select
                     id="service_id"
                     name="service_id"
                     value={formData.service_id}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors appearance-none bg-white"
+                    className="select-field"
                   >
                     <option value="">-- Pilih Layanan --</option>
                     {services.map((service) => (
@@ -520,112 +466,101 @@ export default function AddCustomerPage() {
                       </option>
                     ))}
                   </select>
-                </div>
-              </div>
-
-              {/* Alamat */}
-              <div>
-                <label
-                  htmlFor="address"
-                  className="block text-sm font-medium text-gray-900 mb-2"
-                >
-                  Alamat Lengkap <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="Contoh: Jl. Merdeka No. 123, RT 01 RW 02, Kel. Kebon Kelapa, Kec. Bogor Tengah, Kota Bogor"
-                  required
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400 resize-none"
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Alamat lengkap untuk pengiriman tagihan
-                </p>
-              </div>
-            </div>
-
-            {/* Info Card */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="text-blue-600 text-sm">i</span>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
                   </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-blue-900">Informasi Penting:</p>
-                  <ul className="mt-1 text-sm text-blue-700 space-y-1 list-disc list-inside">
-                    <li>Nomor customer digenerate otomatis dan bersifat unik</li>
-                    <li>Username dan password akan digunakan customer untuk login</li>
-                    <li>Pastikan NIK sesuai dengan KTP (16 digit)</li>
-                    <li>Nomor telepon harus aktif untuk menerima notifikasi</li>
-                  </ul>
-                </div>
               </div>
             </div>
 
-            {/* Form Actions */}
-            <div className="pt-6 border-t border-gray-200">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                >
-                  {saving ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Menyimpan...
-                    </>
-                  ) : (
-                    <>
-                      <span className="mr-2">✓</span>
-                      Simpan Customer
-                    </>
-                  )}
-                </button>
-                <Link
-                  href="/admin/customers"
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors text-center"
-                >
-                  Batalkan
-                </Link>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        {/* Tips Card */}
-        <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <div className="h-6 w-6 rounded-full bg-yellow-100 flex items-center justify-center">
-                <span className="text-yellow-600 text-sm">!</span>
-              </div>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-yellow-900">Tips:</p>
-              <ul className="mt-1 text-sm text-yellow-700 space-y-1">
-                <li>• Nomor customer digenerate otomatis, Anda bisa klik "Generate Ulang" jika ingin mengubah</li>
-                <li>• Gunakan password yang kuat (kombinasi huruf besar, kecil, angka, dan simbol)</li>
-                <li>• Catat username dan password untuk diberikan kepada customer</li>
-                <li>• Verifikasi kembali NIK dan nomor telepon sebelum menyimpan</li>
-              </ul>
+            <div>
+              <label htmlFor="address" className="label-field">
+                Alamat Lengkap <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Contoh: Jl. Merdeka No. 123, RT 01 RW 02, Kel. Kebon Kelapa, Kec. Bogor Tengah, Kota Bogor"
+                required
+                rows={3}
+                className="input-field resize-none"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">Alamat lengkap untuk pengiriman tagihan</p>
             </div>
           </div>
-        </div>
 
-        {/* Footer Note */}
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>PDAM Tirta Pakuan • Sistem Manajemen Customer v1.0</p>
-          <p className="mt-1">Field dengan tanda * wajib diisi</p>
+          <div className="rounded-lg border border-border bg-[#f0f5ff] p-3">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-[#0077b6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3 h-3 text-[#0077b6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-foreground">Informasi Penting:</p>
+                <ul className="mt-1 text-xs text-muted-foreground space-y-0.5 list-disc list-inside">
+                  <li>Nomor customer digenerate otomatis dan bersifat unik</li>
+                  <li>Username dan password akan digunakan customer untuk login</li>
+                  <li>Pastikan NIK sesuai dengan KTP (16 digit)</li>
+                  <li>Nomor telepon harus aktif untuk menerima notifikasi</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-border">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="submit"
+                disabled={saving}
+                className="btn-primary flex-1"
+              >
+                {saving ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Menyimpan...
+                  </>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+                    Simpan Customer
+                  </>
+                )}
+              </button>
+              <Link
+                href="/admin/customers"
+                className="btn-outline flex-1"
+              >
+                Batalkan
+              </Link>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-3">
+        <div className="flex items-start gap-3">
+          <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-3 h-3 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-amber-800">Tips:</p>
+            <ul className="mt-1 text-xs text-amber-700 space-y-0.5 list-disc list-inside">
+              <li>Nomor customer digenerate otomatis, klik &quot;Generate Ulang&quot; jika ingin mengubah</li>
+              <li>Gunakan password yang kuat (kombinasi huruf besar, kecil, angka, dan simbol)</li>
+              <li>Catat username dan password untuk diberikan kepada customer</li>
+              <li>Verifikasi kembali NIK dan nomor telepon sebelum menyimpan</li>
+            </ul>
+          </div>
         </div>
+      </div>
+
+      <div className="mt-6 text-center text-xs text-muted-foreground">
+        <p>PDAM Tirta Pakuan • Sistem Manajemen Customer v1.0</p>
+        <p className="mt-0.5">Field dengan tanda * wajib diisi</p>
       </div>
     </div>
   );

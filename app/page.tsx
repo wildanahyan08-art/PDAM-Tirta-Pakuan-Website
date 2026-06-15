@@ -2,21 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion, useAnimation, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [mobileMenu, setMobileMenu] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
-      
-      // Update active section
       const sections = ["home", "services", "about", "testimonials", "contact"];
       const scrollPosition = window.scrollY + 100;
-      
       for (const section of sections) {
         const element = document.getElementById(section);
         if (element) {
@@ -28,78 +26,45 @@ export default function LandingPage() {
         }
       }
     };
-    
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const stats = [
-    { value: "15K+", label: "Pelanggan Aktif", icon: "👥", color: "from-blue-500 to-cyan-500" },
-    { value: "99.9%", label: "Kualitas Air", icon: "💧", color: "from-emerald-500 to-teal-500" },
-    { value: "24/7", label: "Layanan Darurat", icon: "🕐", color: "from-orange-500 to-red-500" },
-    { value: "4.9", label: "Rating Kepuasan", icon: "⭐", color: "from-yellow-500 to-amber-500" },
+    { value: "15K+", label: "Pelanggan Aktif" },
+    { value: "99.9%", label: "Kualitas Air" },
+    { value: "24/7", label: "Layanan Darurat" },
+    { value: "4.9", label: "Rating Kepuasan" },
   ];
 
   const services = [
     {
       title: "Sambungan Baru",
-      description: "Pasang sambungan air baru dengan proses cepat dan mudah",
-      icon: "🔌",
-      gradient: "from-blue-600 to-indigo-600",
-      features: ["Proses 3 Hari", "Gratis Survey", "Garansi 1 Tahun"]
+      description: "Pasang sambungan air baru dengan proses cepat dan mudah tanpa birokrasi berbelit.",
+      features: ["Proses 3 Hari", "Gratis Survey", "Garansi 1 Tahun"],
     },
     {
       title: "Pembayaran Digital",
-      description: "Bayar tagihan online melalui berbagai metode pembayaran",
-      icon: "💳",
-      gradient: "from-emerald-600 to-teal-600",
-      features: ["Virtual Account", "QRIS", "E-Wallet"]
+      description: "Bayar tagihan online kapan saja melalui berbagai metode pembayaran modern.",
+      features: ["Virtual Account", "QRIS", "E-Wallet"],
     },
     {
       title: "Pengaduan 24 Jam",
-      description: "Layanan pengaduan kebocoran dan gangguan air non-stop",
-      icon: "📞",
-      gradient: "from-orange-600 to-red-600",
-      features: ["Response < 30 Menit", "Teknis Berpengalaman", "Gratis Panggilan"]
+      description: "Layanan pengaduan kebocoran dan gangguan air non-stop setiap hari.",
+      features: ["Respon < 30 Menit", "Teknis Berpengalaman", "Gratis Panggilan"],
     },
     {
       title: "Monitoring Digital",
-      description: "Pantau pemakaian air Anda secara real-time",
-      icon: "📊",
-      gradient: "from-purple-600 to-pink-600",
-      features: ["Aplikasi Mobile", "Notifikasi Real-time", "History Pemakaian"]
+      description: "Pantau pemakaian air Anda secara real-time langsung dari genggaman.",
+      features: ["Aplikasi Mobile", "Notifikasi Real-time", "History Pemakaian"],
     },
   ];
 
   const advantages = [
-    {
-      icon: "✨",
-      title: "Teknologi Terbaru",
-      description: "Menggunakan sistem filtrasi canggih untuk kualitas air terbaik",
-      stat: "99.9%",
-      statLabel: "Kebersihan"
-    },
-    {
-      icon: "🌿",
-      title: "Ramah Lingkungan",
-      description: "Proses pengolahan air yang berkelanjutan dan eco-friendly",
-      stat: "Zero",
-      statLabel: "Waste"
-    },
-    {
-      icon: "⚡",
-      title: "Respon Cepat",
-      description: "Tim tanggap darurat siap melayani 24 jam sehari",
-      stat: "< 30",
-      statLabel: "Menit"
-    },
-    {
-      icon: "🏆",
-      title: "Bersertifikat",
-      description: "Terakreditasi dan memenuhi standar kesehatan nasional",
-      stat: "A+",
-      statLabel: "Rating"
-    },
+    { title: "Teknologi Terbaru", description: "Sistem filtrasi canggih untuk kualitas air terbaik", stat: "99.9%", statLabel: "Kebersihan" },
+    { title: "Ramah Lingkungan", description: "Pengolahan air berkelanjutan dan eco-friendly", stat: "Zero", statLabel: "Waste" },
+    { title: "Respon Cepat", description: "Tim tanggap darurat siap melayani 24 jam", stat: "< 30", statLabel: "Menit" },
+    { title: "Bersertifikat", description: "Terakreditasi standar kesehatan nasional", stat: "A+", statLabel: "Rating" },
   ];
 
   const testimonials = [
@@ -108,639 +73,574 @@ export default function LandingPage() {
       role: "Pelanggan Rumah Tangga",
       image: "https://randomuser.me/api/portraits/men/1.jpg",
       text: "Pelayanan PDAM sangat memuaskan. Air jernih dan tidak pernah mati. Tagihan juga mudah dibayar online.",
-      rating: 5
     },
     {
       name: "Siti Rahayu",
       role: "Pemilik Restoran",
       image: "https://randomuser.me/api/portraits/women/2.jpg",
       text: "Sebagai pengusaha kuliner, kualitas air sangat penting. PDAM Tirta Pakuan selalu memberikan yang terbaik.",
-      rating: 5
     },
     {
       name: "Ahmad Hidayat",
       role: "Developer Perumahan",
       image: "https://randomuser.me/api/portraits/men/3.jpg",
       text: "Kerjasama dengan PDAM sangat profesional. Proses pemasangan cepat dan harga kompetitif.",
-      rating: 4.5
     },
   ];
 
   const faqs = [
-    {
-      q: "Berapa biaya pemasangan sambungan baru?",
-      a: "Biaya pemasangan bervariasi tergantung jarak dari jaringan utama. Mulai dari Rp 500.000. Silakan hubungi kami untuk info lebih detail."
-    },
-    {
-      q: "Bagaimana cara cek tagihan online?",
-      a: "Anda bisa cek tagihan melalui website resmi kami atau aplikasi mobile dengan memasukkan nomor pelanggan."
-    },
-    {
-      q: "Apa yang harus dilakukan jika air keruh?",
-      a: "Segera laporkan melalui layanan pengaduan 24 jam kami. Tim teknis akan segera menindaklanjuti."
-    },
-    {
-      q: "Apakah ada diskon untuk pembayaran tepat waktu?",
-      a: "Ya, kami memberikan diskon 2% untuk pembayaran sebelum tanggal 10 setiap bulannya."
-    },
+    { q: "Berapa biaya pemasangan sambungan baru?", a: "Biaya pemasangan bervariasi tergantung jarak dari jaringan utama, mulai dari Rp 500.000. Silakan hubungi kami untuk informasi lebih detail." },
+    { q: "Bagaimana cara cek tagihan online?", a: "Anda bisa cek tagihan melalui website resmi kami atau aplikasi mobile dengan memasukkan nomor pelanggan." },
+    { q: "Apa yang harus dilakukan jika air keruh?", a: "Segera laporkan melalui layanan pengaduan 24 jam kami. Tim teknis akan segera menindaklanjuti laporan Anda." },
+    { q: "Apakah ada diskon untuk pembayaran tepat waktu?", a: "Ya, kami memberikan diskon 2% untuk pembayaran sebelum tanggal 10 setiap bulannya." },
   ];
 
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const navItems = ["home", "services", "about", "testimonials", "contact"];
+  const navLabels: Record<string, string> = {
+    home: "Beranda",
+    services: "Layanan",
+    about: "Tentang",
+    testimonials: "Testimoni",
+    contact: "Kontak",
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
-      
-      {/* Custom Cursor */}
-      <div className="hidden lg:block fixed w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full mix-blend-difference pointer-events-none z-50 transition-transform duration-300"
-           style={{ transform: 'translate(-50%, -50%)' }}
-           id="custom-cursor" />
-      
-      {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-        scrolled ? "bg-white/95 backdrop-blur-md shadow-2xl py-4" : "bg-transparent py-6"
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <motion.div 
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex items-center space-x-3"
-            >
-              <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse">
-                  <span className="text-white text-2xl font-bold">P</span>
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+    <div className="min-h-screen bg-[#f0f5ff]">
+      <nav className="fixed top-0 w-full z-50 transition-all duration-300 bg-white shadow-sm border-b border-blue-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#0077b6] to-[#00b4d8] flex items-center justify-center shadow-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2C12 2 4 8.5 4 14a8 8 0 0016 0C20 8.5 12 2 12 2z" fill="white" opacity="0.95"/>
+                  <path d="M12 8C12 8 8 11.5 8 14a4 4 0 008 0C16 11.5 12 8 12 8z" fill="white" opacity="0.6"/>
+                </svg>
               </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                  PDAM Tirta Pakuan
-                </h1>
-                <p className="text-xs text-gray-500">Air Bersih untuk Masa Depan</p>
+              <div className="hidden sm:block">
+                <p className="text-sm font-semibold text-[#0a1628] leading-tight">PDAM Tirta Pakuan</p>
+                <p className="text-[10px] text-[#0077b6] font-medium">Air Bersih untuk Masa Depan</p>
               </div>
-            </motion.div>
-            
-            <div className="hidden md:flex space-x-8">
-              {["home", "services", "about", "testimonials", "contact"].map((section) => (
+            </Link>
+
+            <div className="hidden md:flex items-center gap-1">
+              {navItems.map((section) => (
                 <a
                   key={section}
                   href={`#${section}`}
-                  className={`relative text-sm font-medium transition-all duration-300 ${
-                    activeSection === section 
-                      ? "text-blue-600" 
-                      : "text-gray-700 hover:text-blue-600"
+                  className={`px-3.5 py-1.5 text-sm rounded-md transition-colors ${
+                    activeSection === section
+                      ? "bg-[#0077b6] text-white shadow-sm"
+                      : "text-muted-foreground hover:text-[#0077b6] hover:bg-blue-50"
                   }`}
                 >
-                  {section.charAt(0).toUpperCase() + section.slice(1)}
-                  {activeSection === section && (
-                    <motion.div
-                      layoutId="activeSection"
-                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full"
-                      transition={{ duration: 0.3 }}
-                    />
-                  )}
+                  {navLabels[section]}
                 </a>
               ))}
             </div>
-            
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex gap-3"
-            >
-              <Link
-                href="/sign-in"
-                className="px-5 py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium"
-              >
+
+            <div className="flex items-center gap-3">
+              <Link href="/sign-in" className="text-sm text-muted-foreground hover:text-[#0077b6] transition-colors font-medium">
                 Masuk
               </Link>
               <Link
                 href="/sign-up"
-                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="hidden sm:inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#0077b6] to-[#0096c7] text-white text-sm font-medium rounded-lg hover:from-[#00699e] hover:to-[#0084b3] transition-all shadow-sm"
               >
-                Daftar
+                Daftar Gratis
               </Link>
-            </motion.div>
+              <button onClick={() => setMobileMenu(!mobileMenu)} className="md:hidden p-2 text-muted-foreground hover:text-[#0077b6]">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  {mobileMenu ? <path d="M18 6L6 18M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
+                </svg>
+              </button>
+            </div>
           </div>
+
+          {mobileMenu && (
+            <div className="md:hidden pb-4 border-t border-blue-100 mt-2 pt-3">
+              {navItems.map((section) => (
+                <a
+                  key={section}
+                  href={`#${section}`}
+                  onClick={() => setMobileMenu(false)}
+                  className={`block px-3 py-2 text-sm rounded-md mb-1 ${
+                    activeSection === section ? "bg-[#0077b6] text-white" : "text-muted-foreground hover:text-[#0077b6] hover:bg-blue-50"
+                  }`}
+                >
+                  {navLabels[section]}
+                </a>
+              ))}
+              <Link href="/sign-up" className="block px-3 py-2 text-sm text-[#0077b6] font-medium mt-2">
+                Daftar Gratis →
+              </Link>
+            </div>
+          )}
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Background Animation */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-delay"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-400/10 to-indigo-400/10 rounded-full blur-3xl animate-spin-slow"></div>
+      <section id="home" className="relative min-h-screen flex items-center bg-[#0a1628] overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03]">
+          <div className="absolute top-1/4 -right-32 w-[500px] h-[500px] rounded-full bg-white" />
+          <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-white" />
         </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-6">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                <span className="text-blue-600 text-sm font-medium">Layanan Air Bersih Premium</span>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-32 w-full">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#0096c7]" />
+                <span className="text-white/70 text-xs font-medium tracking-wide uppercase">Layanan Air Bersih Premium</span>
               </div>
-              
-              <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
-                <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                  Air Bersih untuk 
-                </span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-5">
+                Air Bersih yang
                 <br />
-                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent animate-gradient">
-                  Masa Depan
-                </span>
+                <span className="text-[#0096c7]">Anda Percaya</span>
+                <br />
+                Sejak 1975
               </h1>
-              
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                PDAM Tirta Pakuan menyediakan air bersih berkualitas tinggi dengan teknologi terkini. 
-                Nikmati kemudahan akses air bersih 24/7 untuk rumah dan bisnis Anda.
+              <p className="text-white/60 text-base sm:text-lg mb-8 max-w-lg leading-relaxed">
+                PDAM Tirta Pakuan menghadirkan air bersih berkualitas tinggi dengan teknologi modern dan pelayanan yang dapat diandalkan setiap saat.
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+              <div className="flex flex-wrap gap-3">
                 <Link
                   href="/sign-up"
-                  className="group relative px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full overflow-hidden shadow-lg hover:shadow-xl transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096c7] text-white font-medium rounded-lg hover:bg-[#0084b3] transition-colors text-sm"
                 >
-                  <span className="relative z-10">Mulai Sekarang</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  Mulai Sekarang
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </Link>
-                <Link
-                  href="#services"
-                  className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-full hover:bg-blue-50 transition-all font-medium"
-                >
+                <a href="#services" className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 text-white text-sm font-medium rounded-lg hover:bg-white/10 transition-colors">
                   Lihat Layanan
-                </Link>
+                </a>
               </div>
-              
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-12">
                 {stats.map((stat, idx) => (
                   <motion.div
                     key={idx}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="flex items-center gap-3"
+                    transition={{ delay: 0.4 + idx * 0.08 }}
+                    className="bg-white/5 rounded-lg p-3.5 border border-white/10"
                   >
-                    <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}>
-                      <span className="text-white text-xl">{stat.icon}</span>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                      <div className="text-sm text-gray-500">{stat.label}</div>
-                    </div>
+                    <div className="text-white font-bold text-xl">{stat.value}</div>
+                    <div className="text-white/50 text-xs mt-0.5">{stat.label}</div>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
-            
+
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="relative flex justify-center lg:justify-end"
             >
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/30 to-indigo-600/30 z-10"></div>
+              <div className="relative rounded-xl overflow-hidden w-full max-w-md">
                 <img
-                  src="https://images.unsplash.com/photo-1548839141-82a1b8ffb0c0?w=600&h=500&fit=crop"
-                  alt="Water Treatment"
-                  className="w-full h-auto object-cover"
+                  src="https://images.pexels.com/photos/14571222/pexels-photo-14571222.jpeg"
+                  alt="Water Treatment Plant"
+                  className="w-full h-[400px] object-cover"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628]/80 via-transparent to-transparent" />
+                <div className="absolute bottom-5 left-5 right-5">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
+                    <p className="text-white text-sm font-medium">Instalasi Pengolahan Air</p>
+                    <p className="text-white/60 text-xs mt-0.5">Teknologi Filtrasi Modern</p>
+                  </div>
+                </div>
               </div>
-              
-              {/* Floating Cards */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="absolute -top-6 -right-6 bg-white rounded-2xl shadow-2xl p-4 z-20"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 text-xl">✓</span>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">100%</p>
-                    <p className="text-sm text-gray-600">Air Layak Minum</p>
-                  </div>
-                </div>
-              </motion.div>
-              
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-                className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-4 z-20"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 text-xl">⭐</span>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">4.9/5</p>
-                    <p className="text-sm text-gray-600">Kepuasan Pelanggan</p>
-                  </div>
-                </div>
-              </motion.div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Services Section */}
-      <section id="services" className="py-24 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="services" className="py-20 sm:py-28 relative">
+        <div className="absolute inset-0 overflow-hidden">
+          <img
+            src="https://images.unsplash.com/photo-1559302995-f2f47c9b67eb?w=1920&h=400&fit=crop"
+            alt=""
+            className="w-full h-full object-cover opacity-[0.03]"
+          />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 relative">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="max-w-xl mb-14"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-4">
-              <span className="text-blue-600 text-sm font-medium">Layanan Premium</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                Layanan Unggulan
-              </span>
+            <span className="text-xs font-semibold text-[#0096c7] uppercase tracking-widest">Layanan Unggulan</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0a1628] mt-3 mb-4">
+              Solusi Lengkap untuk Kebutuhan Air Anda
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Kami menyediakan berbagai layanan terbaik untuk memenuhi kebutuhan air bersih Anda
+            <p className="text-muted-foreground leading-relaxed">
+              Kami menghadirkan layanan terpadu yang memudahkan akses air bersih untuk seluruh kebutuhan Anda
             </p>
           </motion.div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {services.map((service, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-                className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
-                <div className="p-8">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${service.gradient} rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    <span className="text-white text-3xl">{service.icon}</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h3>
-                  <p className="text-gray-600 mb-4">{service.description}</p>
-                  <ul className="space-y-2 mb-6">
-                    {service.features.map((feature, i) => (
-                      <li key={i} className="text-sm text-gray-500 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href="#"
-                    className="text-blue-600 font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all"
-                  >
-                    Selengkapnya
-                    <span>→</span>
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-4">
-                <span className="text-blue-600 text-sm font-medium">Tentang Kami</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                  Lebih dari 45 Tahun
-                </span>
-                <br />
-                <span className="text-blue-600">Melayani Masyarakat</span>
-              </h2>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                PDAM Tirta Pakuan telah menjadi mitra terpercaya masyarakat Kota Bogor dalam menyediakan air bersih berkualitas sejak tahun 1975.
-              </p>
-              <p className="text-gray-600 mb-8 leading-relaxed">
-                Dengan komitmen kuat terhadap kualitas dan pelayanan, kami terus berinovasi menggunakan teknologi terkini untuk memastikan setiap tetes air yang sampai ke rumah Anda aman dan sehat.
-              </p>
-              
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">45+</div>
-                  <div className="text-sm text-gray-600">Tahun Pengalaman</div>
-                </div>
-                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4 text-center">
-                  <div className="text-3xl font-bold text-emerald-600 mb-1">150K+</div>
-                  <div className="text-sm text-gray-600">Pelanggan Terlayani</div>
-                </div>
-              </div>
-              
-              <Link
-                href="#"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all"
-              >
-                Pelajari Lebih Lanjut
-                <span>→</span>
-              </Link>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="grid grid-cols-2 gap-4"
-            >
-              {advantages.map((adv, idx) => (
-                <motion.div
-                  key={idx}
-                  whileHover={{ scale: 1.05 }}
-                  className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 text-center"
-                >
-                  <div className="text-4xl mb-3">{adv.icon}</div>
-                  <h3 className="font-bold text-gray-900 mb-2">{adv.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{adv.description}</p>
-                  <div className="inline-block px-3 py-1 bg-white rounded-full">
-                    <span className="font-bold text-blue-600">{adv.stat}</span>
-                    <span className="text-xs text-gray-500"> {adv.statLabel}</span>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-4">
-              <span className="text-blue-600 text-sm font-medium">Testimonial</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                Apa Kata Mereka?
-              </span>
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Ribuan pelanggan telah merasakan manfaat air bersih berkualitas dari kami
-            </p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-                className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-14 h-14 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-yellow-400">
-                      {i < Math.floor(testimonial.rating) ? "★" : i < testimonial.rating ? "½" : "☆"}
-                    </span>
-                  ))}
-                </div>
-                <p className="text-gray-600 italic">"{testimonial.text}"</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-4">
-              <span className="text-blue-600 text-sm font-medium">FAQ</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                Pertanyaan Umum
-              </span>
-            </h2>
-            <p className="text-lg text-gray-600">
-              Temukan jawaban dari pertanyaan yang sering diajukan
-            </p>
-          </motion.div>
-          
-          <div className="space-y-4">
-            {faqs.map((faq, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
+                transition={{ delay: idx * 0.06 }}
                 viewport={{ once: true }}
-                className="border border-gray-200 rounded-2xl overflow-hidden"
+                className="bg-white rounded-lg border border-border p-6 hover:border-[#0077b6]/20 hover:shadow-sm transition-all"
               >
-                <button
-                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
-                >
-                  <span className="font-semibold text-gray-900">{faq.q}</span>
-                  <span className="text-2xl text-blue-600">
-                    {openFaq === idx ? "−" : "+"}
-                  </span>
-                </button>
-                {openFaq === idx && (
-                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <p className="text-gray-600">{faq.a}</p>
-                  </div>
-                )}
+                <div className="w-11 h-11 rounded-lg bg-[#0077b6]/5 flex items-center justify-center mb-4">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f3b3e" strokeWidth="1.5">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <h3 className="text-base font-semibold text-[#0a1628] mb-2">{service.title}</h3>
+                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{service.description}</p>
+                <ul className="space-y-1.5">
+                  {service.features.map((f, i) => (
+                    <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span className="w-1 h-1 rounded-full bg-[#0096c7]" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section id="contact" className="py-24 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
-        
-        <div className="relative max-w-4xl mx-auto text-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Siap Menikmati Air Bersih?
-            </h2>
-            <p className="text-xl text-blue-100 mb-8">
-              Bergabunglah dengan ribuan pelanggan yang sudah merasakan kualitas air terbaik dari PDAM Tirta Pakuan
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/sign-up"
-                className="px-8 py-3 bg-white text-blue-600 rounded-full hover:bg-gray-100 transition-all shadow-lg font-semibold transform hover:scale-105"
-              >
-                Daftar Sekarang
-              </Link>
-              <Link
-                href="#"
-                className="px-8 py-3 border-2 border-white text-white rounded-full hover:bg-white/10 transition-all font-semibold"
-              >
-                Hubungi Kami
-              </Link>
-            </div>
-          </motion.div>
+      <section id="about" className="py-20 sm:py-28 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="grid lg:grid-cols-2 gap-14 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <span className="text-xs font-semibold text-[#0096c7] uppercase tracking-widest">Tentang Kami</span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#0a1628] mt-3 mb-4 leading-tight">
+                Lebih dari 45 Tahun Melayani Masyarakat
+              </h2>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                PDAM Tirta Pakuan telah menjadi mitra terpercaya masyarakat Kota Bogor dalam menyediakan air bersih berkualitas sejak tahun 1975. Kami bangga melayani lebih dari 150.000 pelanggan dengan standar tertinggi.
+              </p>
+              <p className="text-muted-foreground leading-relaxed mb-8">
+                Dengan komitmen kuat terhadap kualitas dan inovasi, kami terus menggunakan teknologi terkini untuk memastikan setiap tetes air yang sampai ke rumah Anda aman, jernih, dan sehat.
+              </p>
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="bg-[#f0f5ff] rounded-lg p-5 border border-border">
+                  <div className="text-2xl font-bold text-[#0077b6]">45+</div>
+                  <div className="text-xs text-muted-foreground mt-1">Tahun Pengalaman</div>
+                </div>
+                <div className="bg-[#f0f5ff] rounded-lg p-5 border border-border">
+                  <div className="text-2xl font-bold text-[#0096c7]">150K+</div>
+                  <div className="text-xs text-muted-foreground mt-1">Pelanggan Terlayani</div>
+                </div>
+              </div>
+              <a href="#" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0077b6] text-white text-sm font-medium rounded-lg hover:bg-[#00699e] transition-colors">
+                Pelajari Lebih Lanjut
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="space-y-4"
+            >
+              <div className="rounded-xl overflow-hidden border border-border">
+                <img
+                  src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&h=350&fit=crop"
+                  alt="Instalasi Pengolahan Air PDAM"
+                  className="w-full h-52 object-cover"
+                />
+                <div className="absolute" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {advantages.map((adv, idx) => (
+                  <div key={idx} className="bg-[#f0f5ff] rounded-lg p-5 border border-border hover:border-[#0077b6]/20 transition-colors">
+                    <h3 className="font-semibold text-[#0a1628] text-sm mb-1.5">{adv.title}</h3>
+                    <p className="text-xs text-muted-foreground mb-3 leading-relaxed">{adv.description}</p>
+                    <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-white rounded-md border border-border">
+                      <span className="font-bold text-[#0077b6] text-sm">{adv.stat}</span>
+                      <span className="text-[10px] text-muted-foreground">{adv.statLabel}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
-                  <span className="text-white text-xl font-bold">P</span>
+      <div className="bg-[#0a1628] py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="flex flex-wrap gap-8 justify-around items-center">
+            {[
+              { label: "Penghargaan Nasional 2023" },
+              { label: "ISO 9001:2015 Bersertifikat" },
+              { label: "Standar WHO Terpenuhi" },
+              { label: "Ramah Lingkungan" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2.5 text-white/80">
+                <div className="w-2 h-2 rounded-full bg-[#0096c7]" />
+                <span className="text-sm font-medium">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <section id="testimonials" className="py-20 sm:py-28 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-xl mb-14"
+          >
+            <span className="text-xs font-semibold text-[#0096c7] uppercase tracking-widest">Testimoni</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0a1628] mt-3 mb-4">
+              Apa Kata Pelanggan Kami?
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Ribuan pelanggan telah merasakan manfaat air bersih berkualitas dari kami
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-5">
+            {testimonials.map((t, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.08 }}
+                viewport={{ once: true }}
+                className="bg-[#f0f5ff] rounded-lg p-6 border border-border"
+              >
+                <svg className="text-[#0077b6]/10 mb-3" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"/>
+                </svg>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">{t.text}</p>
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
+                  <img src={t.image} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
+                  <div>
+                    <p className="text-sm font-semibold text-[#0a1628]">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 sm:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="grid lg:grid-cols-5 gap-10 items-start">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="lg:col-span-2"
+            >
+              <div className="rounded-xl overflow-hidden border border-border">
+                <img
+                  src="https://images.pexels.com/photos/6109219/pexels-photo-6109219.jpeg"
+                  alt="Kualitas Air Bersih"
+                  className="w-full h-80 object-cover"
+                />
+              </div>
+              <div className="mt-4 bg-[#f0f5ff] rounded-xl border border-border p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-[#0077b6] flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Butuh Bantuan?</p>
+                    <p className="text-xs text-muted-foreground">Hubungi call center kami</p>
+                  </div>
+                </div>
+                <p className="text-lg font-bold text-[#0077b6]">(0251) 123-4567</p>
+              </div>
+            </motion.div>
+
+            <div className="lg:col-span-3">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="mb-10"
+              >
+                <span className="text-xs font-semibold text-[#0096c7] uppercase tracking-widest">FAQ</span>
+                <h2 className="text-3xl sm:text-4xl font-bold text-[#0a1628] mt-3 mb-4">
+                  Pertanyaan Umum
+                </h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  Temukan jawaban dari pertanyaan yang sering diajukan
+                </p>
+              </motion.div>
+
+              <div className="space-y-2">
+                {faqs.map((faq, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    viewport={{ once: true }}
+                    className="bg-white rounded-lg border border-border overflow-hidden"
+                  >
+                    <button
+                      onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                      className="w-full px-5 py-4 text-left flex justify-between items-center hover:bg-[#f0f5ff] transition-colors"
+                    >
+                      <span className="text-sm font-medium text-[#0a1628] pr-4">{faq.q}</span>
+                      <svg
+                        className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${openFaq === idx ? "rotate-180" : ""}`}
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                    {openFaq === idx && (
+                      <div className="px-5 pb-4">
+                        <p className="text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="py-20 sm:py-28 bg-[#0a1628] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.04]">
+          <img
+            src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=1920&h=600&fit=crop"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="max-w-3xl mx-auto text-center px-4 relative"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0096c7]" />
+            <span className="text-white/70 text-xs font-medium uppercase tracking-wide">Bergabung Sekarang</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
+            Siap Menikmati Air Bersih Berkualitas?
+          </h2>
+          <p className="text-white/60 text-base mb-10 max-w-lg mx-auto leading-relaxed">
+            Bergabunglah dengan lebih dari 150.000 pelanggan yang telah merasakan manfaat layanan PDAM Tirta Pakuan
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/sign-up"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096c7] text-white font-medium rounded-lg hover:bg-[#0084b3] transition-colors text-sm"
+            >
+              Daftar Sekarang
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </Link>
+            <a href="tel:025112345678" className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 text-white text-sm font-medium rounded-lg hover:bg-white/10 transition-colors">
+              Hubungi Kami
+            </a>
+          </div>
+        </motion.div>
+      </section>
+
+      <footer className="bg-[#060e1a] text-white py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
+            <div className="sm:col-span-1">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-9 h-9 rounded-lg bg-[#0096c7] flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C12 2 4 8.5 4 14a8 8 0 0016 0C20 8.5 12 2 12 2z" fill="white" opacity="0.9"/>
+                  </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold">PDAM Tirta Pakuan</h3>
-                  <p className="text-sm text-gray-400">Air Bersih untuk Semua</p>
+                  <p className="text-sm font-semibold">PDAM Tirta Pakuan</p>
+                  <p className="text-[10px] text-white/40">Air Bersih untuk Semua</p>
                 </div>
               </div>
-              <p className="text-gray-400 text-sm">
+              <p className="text-sm text-white/50 leading-relaxed">
                 Menyediakan air bersih berkualitas untuk masyarakat Kota Bogor sejak 1975.
               </p>
             </div>
-            
             <div>
-              <h4 className="font-semibold mb-4">Kontak</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li className="flex items-center gap-2">📞 (0251) 1234567</li>
-                <li className="flex items-center gap-2">✉️ info@pdamtirtapakuan.go.id</li>
-                <li className="flex items-center gap-2">📍 Jl. Raya Pajajaran No. 123, Bogor</li>
+              <h4 className="text-sm font-semibold mb-4">Kontak</h4>
+              <ul className="space-y-2.5 text-sm text-white/50">
+                <li className="flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 16.92v3a1.998 1.998 0 01-2.18 2 19.791 19.791 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.791 19.791 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.758 12.758 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.758 12.758 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                  (0251) 123-4567
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  info@pdamtirtapakuan.go.id
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Jl. Raya Pajajaran No. 123, Bogor
+                </li>
               </ul>
             </div>
-            
             <div>
-              <h4 className="font-semibold mb-4">Jam Operasional</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li>Senin - Jumat: 08:00 - 16:00</li>
-                <li>Sabtu: 08:00 - 12:00</li>
-                <li>Call Center: 24 Jam</li>
+              <h4 className="text-sm font-semibold mb-4">Jam Operasional</h4>
+              <ul className="space-y-2 text-sm text-white/50">
+                <li>Senin – Jumat: 08.00 – 16.00</li>
+                <li>Sabtu: 08.00 – 12.00</li>
+                <li className="flex items-center gap-2 text-[#0096c7]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0096c7]" />
+                  Call Center: 24 Jam
+                </li>
               </ul>
             </div>
-            
             <div>
-              <h4 className="font-semibold mb-4">Ikuti Kami</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors">
-                  f
-                </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors">
-                  ig
-                </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors">
-                  tw
-                </a>
+              <h4 className="text-sm font-semibold mb-4">Ikuti Kami</h4>
+              <div className="flex gap-2.5 mb-5">
+                {[
+                  { label: "FB", href: "https://facebook.com/pdamtirtapakuan" },
+                  { label: "IG", href: "https://instagram.com/pdamtirtapakuan" },
+                  { label: "TW", href: "https://twitter.com/pdamtirtapakuan" },
+                  { label: "YT", href: "https://youtube.com/@pdamtirtapakuan" },
+                ].map((s, i) => (
+                  <a key={i} href={s.href}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-medium bg-white/5 border border-white/10 hover:bg-[#0096c7] hover:border-[#0096c7] transition-all"
+                  >
+                    {s.label}
+                  </a>
+                ))}
               </div>
+              <Link href="/sign-up" className="inline-flex items-center gap-2 px-4 py-2 bg-[#0096c7] text-white text-xs font-medium rounded-lg hover:bg-[#0084b3] transition-colors">
+                Daftar Sekarang
+              </Link>
             </div>
           </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-            <p>&copy; 2024 PDAM Tirta Pakuan. All rights reserved.</p>
+          <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-white/30 text-xs border-t border-white/10">
+            <p>© 2024 PDAM Tirta Pakuan. Hak cipta dilindungi.</p>
+            <div className="flex gap-5">
+              <a href="#" className="hover:text-white/60 transition-colors">Kebijakan Privasi</a>
+              <a href="#" className="hover:text-white/60 transition-colors">Syarat & Ketentuan</a>
+            </div>
           </div>
         </div>
       </footer>
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        
-        @keyframes float-delay {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(20px); }
-        }
-        
-        @keyframes spin-slow {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        
-        @keyframes gradient {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .animate-float-delay {
-          animation: float-delay 6s ease-in-out infinite;
-        }
-        
-        .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
-        }
-        
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 3s ease infinite;
-        }
-      `}</style>
     </div>
   );
 }

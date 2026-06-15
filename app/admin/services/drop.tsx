@@ -12,13 +12,11 @@ export default function Drop({ serviceId, serviceName }: DropProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    // Konfirmasi
     if (!confirm(`Yakin hapus service "${serviceName}"?`)) return;
     
     setIsDeleting(true);
     
     try {
-      // Get token
       const token = await getCookies("token");
       
       if (!token) {
@@ -27,10 +25,8 @@ export default function Drop({ serviceId, serviceName }: DropProps) {
         return;
       }
 
-      // URL API
       const apiUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/services/${serviceId}`;
       
-      // DELETE request
       const response = await fetch(apiUrl, {
         method: "DELETE",
         headers: {
@@ -40,24 +36,19 @@ export default function Drop({ serviceId, serviceName }: DropProps) {
         },
       });
 
-      // Handle response
       if (response.ok) {
         alert("✅ Service berhasil dihapus!");
-        // Refresh halaman
         setTimeout(() => {
           window.location.reload();
         }, 500);
         return;
       }
       
-      // Jika error
       const errorText = await response.text();
       
-      // Jika error karena foreign key constraint
       if (errorText.includes("Foreign key constraint") || 
           errorText.includes("service_id")) {
         
-        // Coba approach alternatif: hapus dengan cascade
         const tryForceDelete = confirm(
           `Service "${serviceName}" tidak bisa dihapus karena masih digunakan.\n\n` +
           `Ingin coba hapus dengan menghapus data terkait juga?`
@@ -79,12 +70,8 @@ export default function Drop({ serviceId, serviceName }: DropProps) {
     }
   };
 
-  // Fungsi untuk hapus dengan cascade (hapus data terkait dulu)
   const deleteWithCascade = async (id: number, token: string, name: string) => {
     try {
-      // NOTE: Ini butuh endpoint khusus di backend
-      // Untuk sekarang, kita coba request ke endpoint yang sama dengan approach berbeda
-      
       alert(
         `Fitur cascade delete membutuhkan endpoint khusus di backend.\n\n` +
         `Minta backend developer untuk:\n` +
@@ -93,7 +80,6 @@ export default function Drop({ serviceId, serviceName }: DropProps) {
         `3. Atau implement soft delete`
       );
       
-      // Alternative: Coba delete dengan query parameter force
       const forceUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/services/${id}?force=true`;
       const forceResponse = await fetch(forceUrl, {
         method: "DELETE",
@@ -118,9 +104,22 @@ export default function Drop({ serviceId, serviceName }: DropProps) {
     <button
       onClick={handleDelete}
       disabled={isDeleting}
-      className="px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="px-2.5 py-1 text-xs font-medium rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1"
     >
-      {isDeleting ? "Menghapus..." : "Hapus"}
+      {isDeleting ? (
+        <>
+          <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Menghapus...
+        </>
+      ) : (
+        <>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          Hapus
+        </>
+      )}
     </button>
   );
 }

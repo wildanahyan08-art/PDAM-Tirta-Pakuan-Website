@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCookies } from "@/helper/cookies";
 
-// Types
 interface Customer {
   id: number;
   user_id: number;
@@ -61,7 +60,6 @@ export default function AddBillPage() {
     price: "",
   });
 
-  // Months
   const months = [
     { value: "1", label: "Januari" },
     { value: "2", label: "Februari" },
@@ -77,7 +75,6 @@ export default function AddBillPage() {
     { value: "12", label: "Desember" },
   ];
 
-  // Years (current year and 2 years back/forward)
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
@@ -96,12 +93,8 @@ export default function AddBillPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       const json = await response.json();
-      
-      if (response.ok) {
-        setCustomers(json.data || []);
-      }
+      if (response.ok) setCustomers(json.data || []);
     } catch (error) {
       console.error("Error fetching customers:", error);
     } finally {
@@ -119,12 +112,8 @@ export default function AddBillPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       const json = await response.json();
-      
-      if (response.ok) {
-        setServices(json.data || []);
-      }
+      if (response.ok) setServices(json.data || []);
     } catch (error) {
       console.error("Error fetching services:", error);
     } finally {
@@ -136,111 +125,54 @@ export default function AddBillPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
 
-    // When service changes, update the service details
     if (name === "service_id" && value) {
       const service = services.find(s => s.id === parseInt(value));
       setSelectedService(service || null);
-      
-      // Auto-fill price from service
       if (service) {
-        setFormData(prev => ({
-          ...prev,
-          price: service.price.toString()
-        }));
+        setFormData(prev => ({ ...prev, price: service.price.toString() }));
       }
     }
   };
 
   const generateMeasurementNumber = () => {
-    // Format: INV-YYYYMMDD-XXXX
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const dateStr = `${year}${month}${day}`;
     const randomNum = Math.floor(1000 + Math.random() * 9000);
-    const measurementNumber = `INV-${dateStr}-${randomNum}`;
-    
-    setFormData(prev => ({
-      ...prev,
-      measurement_number: measurementNumber
-    }));
+    setFormData(prev => ({ ...prev, measurement_number: `INV-${dateStr}-${randomNum}` }));
   };
 
   const calculateTotalPrice = () => {
     const usage = parseFloat(formData.usage_value) || 0;
     const unitPrice = parseFloat(formData.price) || 0;
-    const total = usage * unitPrice;
-    
-    return total.toLocaleString('id-ID');
+    return (usage * unitPrice).toLocaleString('id-ID');
   };
 
   const validateForm = (): boolean => {
-    if (!formData.customer_id) {
-      setError("Pilih customer terlebih dahulu");
-      return false;
-    }
-
-    if (!formData.service_id) {
-      setError("Pilih layanan terlebih dahulu");
-      return false;
-    }
-
-    if (!formData.month) {
-      setError("Pilih bulan tagihan");
-      return false;
-    }
-
-    if (!formData.year) {
-      setError("Pilih tahun tagihan");
-      return false;
-    }
-
-    if (!formData.measurement_number) {
-      setError("Nomor pengukuran harus diisi");
-      return false;
-    }
-
-    if (!formData.usage_value || parseFloat(formData.usage_value) <= 0) {
-      setError("Nilai penggunaan harus lebih dari 0");
-      return false;
-    }
-
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      setError("Harga harus lebih dari 0");
-      return false;
-    }
-
-    // Check if bill already exists for this customer in the same month/year
-    // This would typically be done by the backend, but we can add a warning
-
+    if (!formData.customer_id) { setError("Pilih customer terlebih dahulu"); return false; }
+    if (!formData.service_id) { setError("Pilih layanan terlebih dahulu"); return false; }
+    if (!formData.month) { setError("Pilih bulan tagihan"); return false; }
+    if (!formData.year) { setError("Pilih tahun tagihan"); return false; }
+    if (!formData.measurement_number) { setError("Nomor pengukuran harus diisi"); return false; }
+    if (!formData.usage_value || parseFloat(formData.usage_value) <= 0) { setError("Nilai penggunaan harus lebih dari 0"); return false; }
+    if (!formData.price || parseFloat(formData.price) <= 0) { setError("Harga harus lebih dari 0"); return false; }
     return true;
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setSaving(true);
     setError("");
 
     try {
       const token = await getCookies("token");
-      
-      if (!token) {
-        setError("Silakan login ulang");
-        router.push("/sign-in");
-        return;
-      }
+      if (!token) { setError("Silakan login ulang"); router.push("/sign-in"); return; }
 
       const requestBody = {
         customer_id: parseInt(formData.customer_id),
@@ -251,8 +183,6 @@ export default function AddBillPage() {
         usage_value: parseFloat(formData.usage_value),
         price: parseFloat(formData.price),
       };
-
-      console.log("Request Body:", requestBody);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/bills`, {
         method: "POST",
@@ -265,31 +195,15 @@ export default function AddBillPage() {
       });
 
       const json = await response.json();
-
-      if (!response.ok) {
-        throw new Error(json.message || "Gagal menambahkan tagihan");
-      }
+      if (!response.ok) throw new Error(json.message || "Gagal menambahkan tagihan");
 
       setSuccess(true);
-      
-      // Reset form
       setFormData({
-        customer_id: "",
-        service_id: "",
-        month: "",
-        year: "",
-        measurement_number: "",
-        usage_value: "",
-        price: "",
+        customer_id: "", service_id: "", month: "", year: "",
+        measurement_number: "", usage_value: "", price: "",
       });
       setSelectedService(null);
-
-      // Redirect after 1.5 seconds
-      setTimeout(() => {
-        router.push("/admin/bills");
-        router.refresh();
-      }, 1500);
-
+      setTimeout(() => { router.push("/admin/bills"); router.refresh(); }, 1500);
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan");
     } finally {
@@ -299,401 +213,183 @@ export default function AddBillPage() {
 
   if (loadingCustomers || loadingServices) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-3 text-gray-600">Memuat data...</p>
+          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-[#0077b6] border-r-transparent"></div>
+          <p className="mt-3 text-sm text-muted-foreground">Memuat data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+    <div className="max-w-2xl mx-auto">
+      <div className="mb-6">
+        <Link href="/admin/bills" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3 transition-colors">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Kembali
+        </Link>
+        <h1 className="text-2xl font-bold text-[#0a1628]">Buat Tagihan Baru</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">PDAM Tirta Pakuan — Sistem Manajemen Tagihan</p>
+      </div>
+
+      {success && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-5">
+          <div className="flex items-center gap-2.5">
+            <svg className="w-5 h-5 text-emerald-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
             <div>
-              <Link
-                href="/admin/bills"
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-2 transition-colors"
-              >
-                <span>←</span> Kembali ke Daftar Tagihan
-              </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Buat Tagihan Baru</h1>
-              <p className="text-gray-600 mt-1">
-                PDAM Tirta Pakuan • Sistem Manajemen Tagihan
-              </p>
+              <p className="text-sm font-medium text-emerald-800">Tagihan berhasil dibuat!</p>
+              <p className="text-xs text-emerald-600 mt-0.5">Mengalihkan ke halaman daftar tagihan...</p>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Status Messages */}
-        <div className="mb-6 space-y-4">
-          {success && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                    <span className="text-green-600">✓</span>
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p className="font-medium text-green-800">
-                    Tagihan berhasil dibuat!
-                  </p>
-                  <p className="text-sm text-green-600 mt-1">
-                    Mengalihkan ke halaman daftar tagihan...
-                  </p>
-                </div>
-              </div>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-5">
+          <div className="flex items-center gap-2.5">
+            <svg className="w-5 h-5 text-red-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <div>
+              <p className="text-sm font-medium text-red-800">Gagal membuat tagihan</p>
+              <p className="text-xs text-red-600 mt-0.5">{error}</p>
             </div>
-          )}
+          </div>
+        </div>
+      )}
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
-                    <span className="text-red-600">✗</span>
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p className="font-medium text-red-800">Gagal membuat tagihan</p>
-                  <p className="text-sm text-red-600 mt-1">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
+      <div className="bg-white rounded-xl border border-border overflow-hidden">
+        <div className="px-5 py-4 border-b border-border bg-[#f0f5ff]">
+          <h2 className="text-sm font-semibold text-foreground">Form Tagihan</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Isi data tagihan dengan lengkap dan benar</p>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-          {/* Form Header */}
-          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Form Tagihan
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Isi data tagihan dengan lengkap dan benar
-            </p>
-          </div>
-
-          {/* Form Content */}
-          <form onSubmit={handleSubmit} className="px-6 py-8 space-y-6">
-            {/* Informasi Customer */}
-            <div className="space-y-4">
-              <h3 className="text-md font-semibold text-gray-800 flex items-center gap-2">
-                <span className="w-1 h-5 bg-purple-500 rounded-full"></span>
-                Informasi Customer
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Pilih Customer */}
-                <div>
-                  <label
-                    htmlFor="customer_id"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Pilih Customer <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="customer_id"
-                    name="customer_id"
-                    value={formData.customer_id}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors bg-white"
-                  >
-                    <option value="">-- Pilih Customer --</option>
-                    {customers.map((customer) => (
-                      <option key={customer.id} value={customer.id}>
-                        {customer.name} - {customer.customer_number}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Pilih customer yang akan ditagih
-                  </p>
-                </div>
-
-                {/* Pilih Layanan */}
-                <div>
-                  <label
-                    htmlFor="service_id"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Pilih Layanan <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="service_id"
-                    name="service_id"
-                    value={formData.service_id}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors bg-white"
-                  >
-                    <option value="">-- Pilih Layanan --</option>
-                    {services.map((service) => (
-                      <option key={service.id} value={service.id}>
-                        {service.name} - Rp {service.price.toLocaleString()}/m³
-                      </option>
-                    ))}
-                  </select>
-                  {selectedService && (
-                    <p className="mt-1 text-sm text-blue-600">
-                      Range: {selectedService.min_usage} - {selectedService.max_usage} m³
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Informasi Tagihan */}
-            <div className="space-y-4 pt-4">
-              <h3 className="text-md font-semibold text-gray-800 flex items-center gap-2">
-                <span className="w-1 h-5 bg-blue-500 rounded-full"></span>
-                Informasi Tagihan
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Bulan */}
-                <div>
-                  <label
-                    htmlFor="month"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Bulan Tagihan <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="month"
-                    name="month"
-                    value={formData.month}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors bg-white"
-                  >
-                    <option value="">-- Pilih Bulan --</option>
-                    {months.map((month) => (
-                      <option key={month.value} value={month.value}>
-                        {month.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Tahun */}
-                <div>
-                  <label
-                    htmlFor="year"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Tahun Tagihan <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="year"
-                    name="year"
-                    value={formData.year}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors bg-white"
-                  >
-                    <option value="">-- Pilih Tahun --</option>
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Nomor Pengukuran */}
-                <div>
-                  <label
-                    htmlFor="measurement_number"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Nomor Pengukuran <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      id="measurement_number"
-                      name="measurement_number"
-                      value={formData.measurement_number}
-                      onChange={handleChange}
-                      placeholder="INV-20240315-1234"
-                      required
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
-                    />
-                    <button
-                      type="button"
-                      onClick={generateMeasurementNumber}
-                      className="px-4 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium whitespace-nowrap"
-                    >
-                      Generate
-                    </button>
-                  </div>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Nomor unik untuk pengukuran tagihan
-                  </p>
-                </div>
-
-                {/* Penggunaan */}
-                <div>
-                  <label
-                    htmlFor="usage_value"
-                    className="block text-sm font-medium text-gray-900 mb-2"
-                  >
-                    Penggunaan (m³) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    id="usage_value"
-                    name="usage_value"
-                    value={formData.usage_value}
-                    onChange={handleChange}
-                    placeholder="0"
-                    required
-                    min="0"
-                    step="0.01"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
-                  />
-                  <p className="mt-1 text-sm text-gray-500">
-                    Jumlah pemakaian air dalam m³
-                  </p>
-                </div>
-              </div>
-
-              {/* Harga per Unit */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-5">
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <span className="w-1 h-4 rounded bg-[#0096c7]" />
+              Informasi Customer
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label
-                  htmlFor="price"
-                  className="block text-sm font-medium text-gray-900 mb-2"
-                >
-                  Harga per m³ (Rp) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  placeholder="0"
-                  required
-                  min="0"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors placeholder-gray-400"
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Harga per m³ (akan terisi otomatis dari layanan yang dipilih)
-                </p>
+                <label htmlFor="customer_id" className="label-field">Pilih Customer <span className="text-red-500">*</span></label>
+                <select id="customer_id" name="customer_id" value={formData.customer_id} onChange={handleChange} required className="select-field">
+                  <option value="">-- Pilih Customer --</option>
+                  {customers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>{customer.name} - {customer.customer_number}</option>
+                  ))}
+                </select>
               </div>
-
-              {/* Total Tagihan Preview */}
-              {formData.usage_value && formData.price && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-blue-900">Total Tagihan</p>
-                      <p className="text-xs text-blue-700">
-                        {formData.usage_value} m³ × Rp {parseFloat(formData.price).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-blue-900">
-                        Rp {calculateTotalPrice()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Info Card */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <div className="h-6 w-6 rounded-full bg-yellow-100 flex items-center justify-center">
-                    <span className="text-yellow-600 text-sm">!</span>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-yellow-900">Informasi Penting:</p>
-                  <ul className="mt-1 text-sm text-yellow-700 space-y-1 list-disc list-inside">
-                    <li>Pastikan customer dan layanan sudah sesuai</li>
-                    <li>Nomor pengukuran harus unik untuk setiap tagihan</li>
-                    <li>Total tagihan akan dihitung otomatis berdasarkan penggunaan dan harga</li>
-                    <li>Pastikan penggunaan sesuai dengan range layanan yang dipilih</li>
-                  </ul>
-                </div>
+              <div>
+                <label htmlFor="service_id" className="label-field">Pilih Layanan <span className="text-red-500">*</span></label>
+                <select id="service_id" name="service_id" value={formData.service_id} onChange={handleChange} required className="select-field">
+                  <option value="">-- Pilih Layanan --</option>
+                  {services.map((service) => (
+                    <option key={service.id} value={service.id}>{service.name} - Rp {service.price.toLocaleString()}/m³</option>
+                  ))}
+                </select>
+                {selectedService && (
+                  <p className="text-xs text-[#0077b6] mt-1">Range: {selectedService.min_usage} – {selectedService.max_usage} m³</p>
+                )}
               </div>
-            </div>
-
-            {/* Form Actions */}
-            <div className="pt-6 border-t border-gray-200">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                >
-                  {saving ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Menyimpan...
-                    </>
-                  ) : (
-                    <>
-                      <span className="mr-2">✓</span>
-                      Simpan Tagihan
-                    </>
-                  )}
-                </button>
-                <Link
-                  href="/admin/bills"
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors text-center"
-                >
-                  Batalkan
-                </Link>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        {/* Tips Card */}
-        <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">
-                <span className="text-green-600 text-sm">✓</span>
-              </div>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-green-900">Tips Membuat Tagihan:</p>
-              <ul className="mt-1 text-sm text-green-700 space-y-1">
-                <li>• Pilih customer terlebih dahulu untuk memudahkan pengisian</li>
-                <li>• Gunakan tombol "Generate" untuk membuat nomor pengukuran otomatis</li>
-                <li>• Harga akan terisi otomatis setelah memilih layanan</li>
-                <li>• Periksa kembali total tagihan sebelum menyimpan</li>
-                <li>• Pastikan tidak ada duplikasi tagihan untuk periode yang sama</li>
-              </ul>
             </div>
           </div>
-        </div>
 
-        {/* Footer Note */}
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>PDAM Tirta Pakuan • Sistem Manajemen Tagihan v1.0</p>
-          <p className="mt-1">Field dengan tanda * wajib diisi</p>
+          <div className="space-y-3 pt-2">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <span className="w-1 h-4 rounded bg-[#0077b6]" />
+              Informasi Tagihan
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="month" className="label-field">Bulan <span className="text-red-500">*</span></label>
+                <select id="month" name="month" value={formData.month} onChange={handleChange} required className="select-field">
+                  <option value="">-- Pilih Bulan --</option>
+                  {months.map((month) => <option key={month.value} value={month.value}>{month.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="year" className="label-field">Tahun <span className="text-red-500">*</span></label>
+                <select id="year" name="year" value={formData.year} onChange={handleChange} required className="select-field">
+                  <option value="">-- Pilih Tahun --</option>
+                  {years.map((year) => <option key={year} value={year}>{year}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="measurement_number" className="label-field">Nomor Pengukuran <span className="text-red-500">*</span></label>
+                <div className="flex gap-2">
+                  <input type="text" id="measurement_number" name="measurement_number" value={formData.measurement_number} onChange={handleChange} placeholder="INV-20240315-1234" required className="input-field flex-1" />
+                  <button type="button" onClick={generateMeasurementNumber} className="btn-secondary text-xs whitespace-nowrap">Generate</button>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="usage_value" className="label-field">Penggunaan (m³) <span className="text-red-500">*</span></label>
+                <input type="number" id="usage_value" name="usage_value" value={formData.usage_value} onChange={handleChange} placeholder="0" required min="0" step="0.01" className="input-field" />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="price" className="label-field">Harga per m³ (Rp) <span className="text-red-500">*</span></label>
+              <input type="number" id="price" name="price" value={formData.price} onChange={handleChange} placeholder="0" required min="0" className="input-field" />
+            </div>
+
+            {formData.usage_value && formData.price && (
+              <div className="bg-[#f0f5ff] border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Total Tagihan</p>
+                    <p className="text-xs text-muted-foreground">{formData.usage_value} m³ × Rp {parseFloat(formData.price).toLocaleString()}</p>
+                  </div>
+                  <p className="text-xl font-bold text-[#0077b6]">Rp {calculateTotalPrice()}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <div className="flex items-start gap-2.5">
+              <svg className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <div>
+                <p className="text-xs font-medium text-amber-900">Informasi Penting:</p>
+                <ul className="text-xs text-amber-700 mt-1 space-y-0.5 list-disc list-inside">
+                  <li>Pastikan customer dan layanan sudah sesuai</li>
+                  <li>Nomor pengukuran harus unik untuk setiap tagihan</li>
+                  <li>Pastikan penggunaan sesuai dengan range layanan yang dipilih</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-border flex flex-col sm:flex-row gap-3">
+            <button type="submit" disabled={saving} className="btn-primary flex-1">
+              {saving ? (
+                <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Menyimpan...</>
+              ) : (
+                <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> Simpan Tagihan</>
+              )}
+            </button>
+            <Link href="/admin/bills" className="btn-outline flex-1 text-center">Batalkan</Link>
+          </div>
+        </form>
+      </div>
+
+      <div className="mt-5 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+        <div className="flex items-start gap-2.5">
+          <svg className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div>
+            <p className="text-xs font-medium text-emerald-900">Tips:</p>
+            <ul className="text-xs text-emerald-700 mt-1 space-y-0.5">
+              <li>• Gunakan tombol "Generate" untuk membuat nomor pengukuran otomatis</li>
+              <li>• Harga akan terisi otomatis setelah memilih layanan</li>
+              <li>• Pastikan tidak ada duplikasi tagihan untuk periode yang sama</li>
+            </ul>
+          </div>
         </div>
       </div>
+
+      <p className="mt-6 text-center text-xs text-muted-foreground">Field dengan tanda * wajib diisi</p>
     </div>
   );
 }
